@@ -1,0 +1,23 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Roof / warehouse top -->
+  <path d="M12 18L32 6L52 18V20H12V18Z" fill="#0755b1"/>
+
+  <!-- Building body -->
+  <rect x="12" y="20" width="40" height="36" rx="3" fill="#010f55"/>
+
+  <!-- Door -->
+  <rect x="28" y="36" width="8" height="20" fill="#daeaf7"/>
+
+  <!-- Left windows -->
+  <rect x="16" y="24" width="6" height="6" fill="#daeaf7"/>
+  <rect x="16" y="34" width="6" height="6" fill="#daeaf7"/>
+
+  <!-- Right windows -->
+  <rect x="42" y="24" width="6" height="6" fill="#daeaf7"/>
+  <rect x="42" y="34" width="6" height="6" fill="#daeaf7"/>
+
+  <!-- Small delivery box (wholesale hint) -->
+  <rect x="24" y="46" width="16" height="10" rx="2" fill="#0a66c2"/>
+
+</svg>

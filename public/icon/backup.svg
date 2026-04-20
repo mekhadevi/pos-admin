@@ -1,0 +1,17 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Database base -->
+  <ellipse cx="32" cy="14" rx="18" ry="6" fill="#0755b1"/>
+  <path d="M14 14V34C14 37.3 22 40 32 40C42 40 50 37.3 50 34V14"
+        fill="#010f55"/>
+
+  <!-- Middle layer -->
+  <ellipse cx="32" cy="34" rx="18" ry="6" fill="#0755b1"/>
+  <path d="M14 34V48C14 51.3 22 54 32 54C42 54 50 51.3 50 48V34"
+        fill="#010f55"/>
+
+  <!-- Upload arrow (backup symbol) -->
+  <path d="M32 44V24" stroke="#daeaf7" stroke-width="3" stroke-linecap="round"/>
+  <path d="M26 30L32 24L38 30" stroke="#daeaf7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+</svg>

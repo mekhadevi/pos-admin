@@ -1,0 +1,26 @@
+<div class="wrap">
+  <div class="title">Export products</div>
+  <div class="fsec">
+    <div class="slbl">Export options</div>
+    <div class="r2">
+      <div class="fg">
+        <label>Format</label>
+        <select [(ngModel)]="format">
+          <option>CSV</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Filter by category</label>
+        <select [(ngModel)]="selectedCategoryId">
+          <option [ngValue]="null">All categories</option>
+          <option *ngFor="let c of categories" [ngValue]="c.Id">{{ c.Name }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="fa">
+      <button class="export-btn" (click)="doExport()" [disabled]="exporting">
+        {{ exporting ? 'Preparing...' : '⬇ Download export' }}
+      </button>
+    </div>
+  </div>
+</div>

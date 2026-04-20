@@ -1,0 +1,31 @@
+<div class="wrap">
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 50px">#</th>
+        <th>Product</th>
+        <th style="width: 110px">Type</th>
+        <th style="width: 80px">Qty</th>
+        <th>Note</th>
+        <th style="width: 140px">Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let m of movements">
+        <td class="id-cell">{{ m.Id }}</td>
+        <td class="name-cell">{{ m.ProductName || '—' }}</td>
+        <td>
+          <span class="type-tag" [class]="typeClass(m.Type)">{{ m.Type }}</span>
+        </td>
+        <td class="qty-cell" [class.pos]="m.Qty > 0" [class.neg]="m.Qty < 0">
+          {{ m.Qty > 0 ? '+' : '' }}{{ m.Qty }}
+        </td>
+        <td class="note-cell">{{ m.Note }}</td>
+        <td class="date-cell">{{ m.CreatedAt }}</td>
+      </tr>
+      <tr *ngIf="movements.length === 0">
+        <td colspan="6" class="empty">No stock movements yet</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

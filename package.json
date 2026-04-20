@@ -1,0 +1,91 @@
+{
+  "name": "pos-admin",
+  "version": "0.0.0",
+  "main": "electron/main.js",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "electron": "electron .",
+    "build": "ng build",
+    "dev": "concurrently \"ng serve\" \"wait-on http://localhost:4200 && electron .\"",
+    "dist": "npm run build && electron-builder",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test",
+    "serve:ssr:pos-admin": "node dist/pos-admin/server/server.mjs"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "overrides": [
+      {
+        "files": "*.html",
+        "options": {
+          "parser": "angular"
+        }
+      }
+    ]
+  },
+  "private": true,
+  "packageManager": "npm@10.9.3",
+  "dependencies": {
+    "@angular/animations": "^21.2.0",
+    "@angular/common": "^21.1.0",
+    "@angular/compiler": "^21.1.0",
+    "@angular/core": "^21.1.0",
+    "@angular/forms": "^21.1.0",
+    "@angular/platform-browser": "^21.1.0",
+    "@angular/platform-server": "^21.1.0",
+    "@angular/router": "^21.1.0",
+    "@angular/ssr": "^21.1.4",
+    "@fortawesome/angular-fontawesome": "^4.0.0",
+    "@fortawesome/fontawesome-free": "^7.2.0",
+    "@fortawesome/free-solid-svg-icons": "^7.1.0",
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^12.8.0",
+    "electron-is-dev": "^3.0.1",
+    "express": "^5.1.0",
+    "ng2-charts": "^9.0.0",
+    "node-fetch": "^2.7.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.1.4",
+    "@angular/cli": "^21.1.4",
+    "@angular/compiler-cli": "^21.1.0",
+    "@fortawesome/angular-fontawesome": "^4.0.0",
+    "@types/express": "^5.0.1",
+    "@types/node": "^20.17.19",
+    "chart.js": "^4.5.1",
+    "concurrently": "^9.2.1",
+    "electron": "^40.7.0",
+    "electron-builder": "^26.8.1",
+    "electron-rebuild": "^3.2.9",
+    "jsdom": "^27.1.0",
+    "typescript": "~5.9.2",
+    "vitest": "^4.0.8",
+    "wait-on": "^9.0.5"
+  },
+  "build": {
+    "appId": "com.posdesktop.app",
+    "productName": "POS Desktop",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    }
+  }
+}

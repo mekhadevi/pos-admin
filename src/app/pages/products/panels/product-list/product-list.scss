@@ -1,0 +1,247 @@
+.list-wrap {
+  flex: 1;
+  overflow-y: auto;
+}
+.list-wrap::-webkit-scrollbar {
+  width: 4px;
+}
+.list-wrap::-webkit-scrollbar-thumb {
+  background: #152540;
+  border-radius: 4px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  table-layout: fixed;
+}
+thead th {
+  font-size: 10px;
+  font-weight: 600;
+  color: #3a5a7a;
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid #152540;
+  background: #08111f;
+  position: sticky;
+  top: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #0d1a2e;
+  color: #c8dff0;
+  vertical-align: middle;
+}
+tbody tr:hover td {
+  background: #0d1f3c;
+}
+.td-id {
+  color: #1e3550 !important;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+}
+.td-name {
+  color: #fff !important;
+  font-weight: 500;
+}
+.mono {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: #5a8ab0 !important;
+}
+.td-price {
+  color: #378add !important;
+  font-weight: 600;
+  font-family: 'DM Mono', monospace;
+}
+.td-date {
+  font-size: 11px;
+  color: #3a5a7a !important;
+}
+.cat-tag {
+  display: inline-block;
+  background: #0d1f3c;
+  border: 1px solid #1a3060;
+  border-radius: 5px;
+  padding: 2px 7px;
+  font-size: 11px;
+  color: #7a9cc4;
+}
+.vbadge {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: #152540;
+  color: #5a8ab0;
+}
+.vbadge.inc {
+  background: #063028;
+  color: #3dba8a;
+}
+.sbadge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 5px;
+}
+.s-ok {
+  background: #063028;
+  color: #3dba8a;
+}
+.s-low {
+  background: #3d2200;
+  color: #ef9f27;
+}
+.s-out {
+  background: #3d0f0f;
+  color: #e24b4a;
+}
+.act-row {
+  display: flex;
+  gap: 4px;
+}
+.ab {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #152540;
+  background: #0d1f3c;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5a8ab0;
+  transition: all 0.15s;
+}
+.ab.e:hover {
+  border-color: #378add;
+  color: #378add;
+}
+.ab.s:hover {
+  border-color: #1d9e75;
+  color: #1d9e75;
+}
+.ab.d:hover {
+  border-color: #e24b4a;
+  color: #e24b4a;
+}
+.empty {
+  text-align: center;
+  padding: 60px !important;
+  color: #3a5a7a;
+  font-size: 14px;
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+.modal {
+  background: #0d1f3c;
+  border: 1px solid #152540;
+  border-radius: 12px;
+  padding: 26px 28px;
+  max-width: 360px;
+  width: 90%;
+}
+.modal-ico {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 5px;
+}
+.modal-sub {
+  font-size: 13px;
+  color: #5a8ab0;
+  margin-bottom: 16px;
+}
+.modal-btns {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.cancel-btn {
+  background: transparent;
+  color: #7a9cc4;
+  border: 1px solid #152540;
+  border-radius: 7px;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+}
+.del-btn {
+  background: #5a1515;
+  color: #f09595;
+  border: none;
+  border-radius: 7px;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+}
+.del-btn:hover {
+  background: #7a1f1f;
+}
+.save-btn {
+  background: #1d5799;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+}
+.save-btn:hover {
+  background: #2470c2;
+}
+.stock-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.sf-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sf-group label {
+  font-size: 12px;
+  color: #7a9cc4;
+}
+.sf-group input {
+  background: #08111f;
+  border: 1px solid #152540;
+  border-radius: 7px;
+  padding: 8px 10px;
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+  font-family: 'DM Sans', sans-serif;
+}
+.sf-group input:focus {
+  border-color: #1d5799;
+}
+.sf-preview {
+  font-size: 13px;
+  color: #5a8ab0;
+}
+.sf-preview strong {
+  color: #378add;
+  font-size: 16px;
+}

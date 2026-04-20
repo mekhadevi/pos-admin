@@ -1,0 +1,10 @@
+<div class="layout" [class.dark]="store.darkMode()">
+  <app-sidebar />
+
+  <div class="main">
+    <app-topbar />
+    <div class="content shell">
+      <router-outlet />
+    </div>
+  </div>
+</div>

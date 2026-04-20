@@ -1,0 +1,106 @@
+<div class="invoice-container no-print">
+  <h2 class="invoice-title">Invoice</h2>
+
+  <div class="cart-items">
+    @if (store.cart().length === 0) {
+      <div class="empty-state">
+        <p>Your cart is empty</p>
+      </div>
+    }
+
+    @for (item of store.cart(); track item.product.id) {
+      <div class="cart-item">
+        <img [src]="item.product.image" class="item-thumb" />
+        <div class="item-info">
+          <span class="item-name">{{ item.product.name }}</span>
+          <span class="item-note">Default options applied</span>
+          <span class="item-price-qty"
+            >{{ item.quantity }}x
+            <span class="price">${{ item.product.price | number: '1.1-1' }}</span></span
+          >
+        </div>
+        <div class="item-actions">
+          <div class="qty-control">
+            <button (click)="store.decrease(item)">-</button>
+            <span>{{ item.quantity }}</span>
+            <button (click)="store.increase(item)">+</button>
+          </div>
+          <span class="total-price"
+            >${{ item.product.price * item.quantity | number: '1.1-1' }}</span
+          >
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="payment-summary">
+    <h4>Payment Summary</h4>
+    <div class="summary-row">
+      <span>Sub Total</span>
+      <strong>${{ store.subTotal() | number: '1.1-1' }}</strong>
+    </div>
+    <div class="summary-row">
+      <span>Tax ({{ store.taxPercentage() }}%)</span>
+      <strong>${{ store.taxAmount() | number: '1.1-1' }}</strong>
+    </div>
+    <div class="summary-row grand-total">
+      <span>Total Payment</span>
+      <strong>${{ store.grandTotal() | number: '1.1-1' }}</strong>
+    </div>
+
+    <div class="payment-methods">
+      <button
+        [class.active]="store.paymentMethod() === 'card'"
+        (click)="store.paymentMethod.set('card')"
+      >
+        <i class="fa-solid fa-credit-card"></i> Credit Card
+      </button>
+      <button
+        [class.active]="store.paymentMethod() === 'upi'"
+        (click)="store.paymentMethod.set('upi')"
+      >
+        <i class="fa-solid fa-wallet"></i> Paylater
+      </button>
+      <button
+        [class.active]="store.paymentMethod() === 'cash'"
+        (click)="store.paymentMethod.set('cash')"
+      >
+        <i class="fa-solid fa-money-bill"></i> Cash
+      </button>
+    </div>
+
+    <button class="btn-place-order" (click)="checkout()">Place An Order</button>
+  </div>
+</div>
+
+<div id="print-receipt" class="print-only">
+  <div class="receipt-content">
+    <h1 style="text-align: center">RECEIPT</h1>
+    <p>Date: {{ today | date: 'dd MMM yyyy HH:mm' }}</p>
+    <hr />
+    <table width="100%">
+      <thead>
+        <tr>
+          <th align="left">Item</th>
+          <th align="center">Qty</th>
+          <th align="right">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of store.cart(); track item.product.id) {
+          <tr>
+            <td>{{ item.product.name }}</td>
+            <td align="center">{{ item.quantity }}</td>
+            <td align="right">${{ item.product.price * item.quantity | number: '1.2-2' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <hr />
+    <div style="text-align: right">
+      <p>Subtotal: ${{ store.subTotal() | number: '1.2-2' }}</p>
+      <p>Tax: ${{ store.taxAmount() | number: '1.2-2' }}</p>
+      <h2>Total: ${{ store.grandTotal() | number: '1.2-2' }}</h2>
+    </div>
+  </div>
+</div>

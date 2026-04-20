@@ -1,0 +1,9 @@
+<div class="card">
+  <img [src]="product.image" />
+  <h4>{{ product.name }}</h4>
+
+  <div class="bottom">
+    <span>${{ product.price }}</span>
+    <button (click)="add()">Add</button>
+  </div>
+</div>

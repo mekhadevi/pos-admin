@@ -1,0 +1,32 @@
+<aside class="sidebar">
+  <div class="grp">
+    <div class="grp-lbl">Products</div>
+    <button class="nav" [class.act]="view === 'list'" (click)="go('list')">Product list</button>
+    <button class="nav" [class.act]="view === 'add'" (click)="go('add')">Add product</button>
+    <button class="nav" [class.act]="view === 'categories'" (click)="go('categories')">
+      Categories
+    </button>
+  </div>
+  <div class="grp">
+    <div class="grp-lbl">Stock</div>
+    <button class="nav" [class.act]="view === 'stock-levels'" (click)="go('stock-levels')">
+      Stock levels
+    </button>
+    <button class="nav" [class.act]="view === 'low-stock'" (click)="go('low-stock')">
+      Low stock alerts
+      <span class="nb" *ngIf="lowStockCount > 0">{{ lowStockCount }}</span>
+    </button>
+    <button class="nav" [class.act]="view === 'stock-movements'" (click)="go('stock-movements')">
+      Stock movements
+    </button>
+  </div>
+  <div class="grp">
+    <div class="grp-lbl">Import</div>
+    <button class="nav" [class.act]="view === 'import-csv'" (click)="go('import-csv')">
+      Import CSV
+    </button>
+    <button class="nav" [class.act]="view === 'export'" (click)="go('export')">
+      Export products
+    </button>
+  </div>
+</aside>

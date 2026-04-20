@@ -1,0 +1,54 @@
+.pos-container {
+  display: flex;
+  height: 108vh;
+  gap: 20px;
+}
+
+.left {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.products {
+  margin-top: 20px;
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  overflow-y: auto;
+  padding-right: 10px;
+  /* ... your existing grid and flex properties ... */
+  overflow-y: auto;
+  padding-right: 10px; /* Prevents content from touching the scrollbar */
+
+  /* 1. Chrome, Safari, and Edge (WebKit) */
+  &::-webkit-scrollbar {
+    width: 6px; /* Very thin width */
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent; /* Makes the track invisible */
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #e2e8f0; /* Soft gray color */
+    border-radius: 10px; /* Fully rounded edges */
+
+    &:hover {
+      background: #94a3b8; /* Darkens slightly on hover */
+    }
+  }
+
+  /* 2. Firefox Support */
+  scrollbar-width: thin;
+  scrollbar-color: #e2e8f0 transparent;
+}
+
+.right {
+  /* Change from flex: 1 to a fixed width or a smaller flex basis */
+  width: 320px; /* Reduced from typical 400px to 320px */
+  flex-shrink: 0; /* Prevents the panel from getting squashed */
+  height: 100%;
+}

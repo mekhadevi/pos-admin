@@ -1,0 +1,139 @@
+<div class="dashboard">
+  <div class="first-grid">
+    <!-- SALES OVERVIEW -->
+    <!-- <div class="sales-overview card">
+      <div class="card-header">
+        <h3>Sales Overview</h3>
+
+        <div class="filters">
+          <button [class.active]="viewMode() === 'monthly'" (click)="setView('monthly')">
+            12 Months
+          </button>
+          <button [class.active]="viewMode() === 'quarterly'" (click)="setView('quarterly')">
+            30 days
+          </button>
+          <button [class.active]="viewMode() === 'yearly'" (click)="setView('yearly')">
+            7 days
+          </button>
+        </div>
+      </div>
+
+      <div class="chart-wrapper">
+        <canvas
+          baseChart
+          [data]="currentSalesData()"
+          [options]="chartOptions()"
+          [type]="currentChartType()"
+        >
+        </canvas>
+      </div>
+    </div> -->
+    <div class="reports-container">
+      <div class="sales-overview card">
+        <div class="card-header">
+          <div class="title-group">
+            <h3>Sales Overview</h3>
+            <p class="date-text">{{ today }}</p>
+          </div>
+
+          <div class="filters">
+            <button [class.active]="viewMode() === 'monthly'" (click)="setView('monthly')">
+              12 Months
+            </button>
+            <button [class.active]="viewMode() === 'quarterly'" (click)="setView('quarterly')">
+              30 days
+            </button>
+            <button [class.active]="viewMode() === 'yearly'" (click)="setView('yearly')">
+              7 days
+            </button>
+          </div>
+        </div>
+
+        <div class="chart-wrapper">
+          <canvas
+            baseChart
+            [data]="currentSalesData()"
+            [options]="chartOptions()"
+            [type]="currentChartType()"
+          >
+          </canvas>
+        </div>
+      </div>
+    </div>
+    <!-- SUMMARY CARDS -->
+    <div class="summary-grid1">
+      @for (card of summaryCards(); track card.title) {
+        <div class="summary-card1">
+          <div class="icon-wrapper" [style.background-color]="card.bgColor">
+            <i [class]="card.icon" [style.color]="card.iconColor"></i>
+          </div>
+          <div class="card-content">
+            <p class="card-title">{{ card.title }}</p>
+            <h2 class="card-value">{{ card.value }}</h2>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+  <!-- BOTTOM SECTION -->
+  <div class="bottom-grid">
+    <!-- Top Products -->
+    <div class="top-selling-card card">
+      <div class="card-header">
+        <h3>Top Selling Products</h3>
+        <select class="date-filter">
+          <option>Today (29 April)</option>
+        </select>
+      </div>
+
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th>Product Name</th>
+            <th>Total Sold</th>
+            <th>Total Revenue</th>
+            <th>Store</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (product of topProducts(); track product.name) {
+            <tr>
+              <td class="product-info">
+                <img [src]="product.image" [alt]="product.name" class="product-img" />
+                <div class="text-group">
+                  <span class="name">{{ product.name }}</span>
+                  <span class="desc">{{ product.description }}</span>
+                </div>
+              </td>
+              <td>{{ product.totalSold }}</td>
+              <td class="revenue">{{ product.totalRevenue }}</td>
+              <td>{{ product.store }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="donut-section">
+      <div class="card">
+        <h4>Sales by Store Location</h4>
+        <div style="height: 200px">
+          <canvas baseChart [data]="locationSalesData" [options]="donutOptions" [type]="'doughnut'">
+          </canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4>Purchase by Store Location</h4>
+        <div style="height: 200px">
+          <canvas
+            baseChart
+            [data]="locationPurchaseData"
+            [options]="donutOptions"
+            [type]="'doughnut'"
+          >
+          </canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

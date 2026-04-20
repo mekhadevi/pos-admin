@@ -1,0 +1,24 @@
+<div class="wrap">
+  <div class="title">Categories</div>
+  <div class="cat-row" *ngFor="let c of categories">
+    <div class="cat-name">{{ c.Name }}</div>
+    <div class="cat-count">{{ productCount(c.Id) }} products</div>
+    <button class="del-btn" (click)="delete.emit(c.Id)">
+      <svg
+        width="13"
+        height="13"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <polyline points="3 6 5 6 21 6" />
+        <path d="M19 6l-1 14H6L5 6" />
+      </svg>
+    </button>
+  </div>
+  <div class="add-row">
+    <input [(ngModel)]="newName" placeholder="New category name..." (keyup.enter)="doAdd()" />
+    <button class="add-btn" (click)="doAdd()">+ Add</button>
+  </div>
+</div>

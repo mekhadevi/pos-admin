@@ -1,0 +1,34 @@
+<div class="login-page">
+  <div class="info-holder">
+    <img src="bg2.svg" />
+  </div>
+  <div class="blob blob-2"></div>
+
+  <div class="login-card" @cardReveal>
+    <div class="logo-container">
+      <div class="logo-3d">K</div>
+    </div>
+
+    <div class="content" @staggerFade>
+      <h1 class="animate-item">Welcome Back</h1>
+      <p class="animate-item">Please enter your details.</p>
+
+      <div class="actions animate-item">
+        <input
+          [value]="username()"
+          (input)="username.set($any($event.target).value)"
+          placeholder="Username"
+        />
+
+        <input
+          type="password"
+          [value]="password()"
+          (input)="password.set($any($event.target).value)"
+          placeholder="Password"
+        />
+
+        <button (click)="onSignIn()">Login</button>
+      </div>
+    </div>
+  </div>
+</div>

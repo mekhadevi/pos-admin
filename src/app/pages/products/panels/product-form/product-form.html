@@ -1,0 +1,146 @@
+<div class="fp">
+  <div class="fh">
+    <div class="ft">{{ editing ? 'Edit product' : 'Add new product' }}</div>
+    <div class="fh-btns">
+      <button class="cancel-btn" (click)="cancel.emit()">Cancel</button>
+      <button class="save-btn" (click)="submit()" [disabled]="saving">
+        {{ saving ? 'Saving...' : editing ? 'Update product' : 'Save product' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Basic info -->
+  <div class="fsec">
+    <div class="slbl">Basic info</div>
+    <div class="fg full">
+      <label>Product name *</label>
+      <input [(ngModel)]="f.name" placeholder="e.g. Kinder Chocolate 50g" />
+    </div>
+    <div class="r2">
+      <div class="fg">
+        <label>Category</label>
+        <select [(ngModel)]="f.categoryId">
+          <option [ngValue]="null">— No category —</option>
+          <option *ngFor="let c of categories" [ngValue]="c.Id">{{ c.Name }}</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Unit</label>
+        <select [(ngModel)]="f.unit">
+          <option>Piece</option>
+          <option>kg</option>
+          <option>Litre</option>
+          <option>Pack</option>
+          <option>Box</option>
+        </select>
+      </div>
+    </div>
+    <div class="r2">
+      <div class="fg">
+        <label>Barcode</label>
+        <div class="ir">
+          <input [(ngModel)]="f.barcode" placeholder="8699432205972" />
+          <button class="scan-btn">📷 Scan</button>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Barcode 2</label>
+        <input [(ngModel)]="f.barcode2" placeholder="Optional" />
+      </div>
+    </div>
+    <div class="r2">
+      <div class="fg">
+        <label>SKU / Code</label>
+        <input [(ngModel)]="f.sku" placeholder="SKU-001" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Pricing -->
+  <div class="fsec">
+    <div class="slbl">Pricing & VAT</div>
+    <div class="r2">
+      <div class="fg">
+        <label>Cost price ($)</label>
+        <input type="number" [(ngModel)]="f.costPrice" placeholder="0.00" />
+      </div>
+      <div class="fg">
+        <label>Selling price ($) *</label>
+        <input type="number" [(ngModel)]="f.price" placeholder="0.00" />
+      </div>
+    </div>
+    <div class="r2">
+      <div class="fg">
+        <label>VAT rate (%)</label>
+        <select [(ngModel)]="f.vatRate">
+          <option [ngValue]="0">0% — No VAT</option>
+          <option [ngValue]="10">10% — Standard</option>
+          <option [ngValue]="5">5% — Reduced</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Discount (%)</label>
+        <input type="number" [(ngModel)]="f.discount" placeholder="0" />
+      </div>
+    </div>
+    <div class="r2">
+      <div class="fg">
+        <label>VAT inclusive?</label>
+        <label class="toggle">
+          <input type="checkbox" [(ngModel)]="f.isVATInclusive" />
+          <div class="tr"></div>
+          <span class="tl">{{ f.isVATInclusive ? 'Price includes VAT' : 'VAT added on top' }}</span>
+        </label>
+      </div>
+      <div class="fg" *ngIf="f.price && f.vatRate">
+        <label>Price preview</label>
+        <div class="pprev">
+          <ng-container *ngIf="!f.isVATInclusive">
+            \${{ f.price }} + {{ f.vatRate }}% =
+            <strong>\${{ f.price! * (1 + f.vatRate / 100) | number: '1.2-2' }}</strong>
+          </ng-container>
+          <ng-container *ngIf="f.isVATInclusive">
+            \${{ f.price }} incl. VAT (net \${{
+              f.price! / (1 + f.vatRate / 100) | number: '1.2-2'
+            }})
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stock -->
+  <div class="fsec">
+    <div class="slbl">Stock</div>
+    <div class="r3">
+      <div class="fg">
+        <label>Opening stock</label>
+        <input type="number" [(ngModel)]="f.stockQty" placeholder="0" />
+      </div>
+      <div class="fg">
+        <label>Low stock alert</label>
+        <input type="number" [(ngModel)]="f.lowStockThreshold" placeholder="10" />
+      </div>
+      <div class="fg">
+        <label>Max stock</label>
+        <input type="number" [(ngModel)]="f.maxStock" placeholder="500" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Audit -->
+  <div class="fsec">
+    <div class="slbl">Audit log</div>
+    <div class="fg">
+      <label>Note (optional)</label>
+      <input [(ngModel)]="f.log" placeholder="e.g. Initial entry by admin" />
+    </div>
+  </div>
+
+  <div class="fa">
+    <button class="cancel-btn" (click)="cancel.emit()">Cancel</button>
+    <button class="save-btn" (click)="submit()" [disabled]="saving">
+      {{ saving ? 'Saving...' : editing ? 'Update product' : 'Save product' }}
+    </button>
+  </div>
+</div>

@@ -1,0 +1,62 @@
+/* category-tabs.component.scss */
+.category-tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.category-tab {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: #ffffff;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+
+  .icon {
+    font-size: 24px;
+    background: #f1f3f5;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+  }
+
+  .text {
+    display: flex;
+    flex-direction: column;
+
+    strong {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    small {
+      font-size: 12px;
+      color: #888;
+    }
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &.active {
+    background: #3b82f6;
+    color: white !important;
+
+    .icon {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    small {
+      color: #e0e7ff;
+    }
+  }
+}

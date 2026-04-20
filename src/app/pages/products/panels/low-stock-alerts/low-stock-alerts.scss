@@ -1,0 +1,74 @@
+.wrap {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.empty {
+  color: #3a5a7a;
+  text-align: center;
+  padding: 40px;
+  font-size: 14px;
+}
+.al-card {
+  background: #0d1f3c;
+  border: 1px solid #3d2200;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.al-card.out {
+  border-color: #5a1515;
+}
+.al-ico {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #3d2200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.al-ico.out-ico {
+  background: #3d0f0f;
+}
+.al-body {
+  flex: 1;
+}
+.al-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 2px;
+}
+.al-meta {
+  font-size: 11px;
+  color: #3a5a7a;
+}
+.al-right {
+  text-align: right;
+}
+.al-qty {
+  font-size: 18px;
+  font-weight: 600;
+  font-family: 'DM Mono', monospace;
+  color: #ef9f27;
+}
+.al-qty.out {
+  color: #e24b4a;
+}
+.al-sub {
+  font-size: 11px;
+  color: #3a5a7a;
+}

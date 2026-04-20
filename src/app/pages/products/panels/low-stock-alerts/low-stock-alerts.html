@@ -1,0 +1,33 @@
+<div class="wrap">
+  <div class="title">Low stock alerts</div>
+  <div *ngIf="lowList.length === 0" class="empty">No low stock alerts 🎉</div>
+  <div class="al-card" *ngFor="let p of lowList" [class.out]="p.StockQty <= 0">
+    <div class="al-ico" [class.out-ico]="p.StockQty <= 0">
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        [attr.stroke]="p.StockQty <= 0 ? '#E24B4A' : '#EF9F27'"
+        stroke-width="2"
+      >
+        <path
+          d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+        />
+        <line x1="12" y1="9" x2="12" y2="13" />
+      </svg>
+    </div>
+    <div class="al-body">
+      <div class="al-name">{{ p.Name }}</div>
+      <div class="al-meta">
+        Threshold: {{ p.LowStockThreshold }} &bull; {{ p.CategoryName || '—' }}
+      </div>
+    </div>
+    <div class="al-right">
+      <div class="al-qty" [class.out]="p.StockQty <= 0">
+        {{ p.StockQty <= 0 ? 'OUT' : p.StockQty + ' left' }}
+      </div>
+      <div class="al-sub">{{ p.StockQty <= 0 ? 'Out of stock' : 'Low stock' }}</div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,48 @@
+.app-layout {
+  display: grid;
+  grid-template-columns: 80px 1fr; // Sidebar width
+  grid-template-rows: 70px 1fr; // Topbar height
+  height: 100vh;
+
+  // When on login page, ignore the grid and go full screen
+  &.full-screen {
+    display: block;
+    .content-wrapper {
+      height: 100vh;
+      width: 100vw;
+    }
+  }
+}
+
+.topbar {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.sidebar {
+  grid-row: 1 / 3;
+  background: #fff;
+  border-right: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+}
+
+.content-wrapper {
+  background: #f8fafc;
+  overflow-y: auto;
+  position: relative;
+}
+.shell {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}

@@ -1,0 +1,42 @@
+<div class="wrap">
+  <div class="grid">
+    <div class="card" *ngFor="let p of products">
+      <div class="card-left">
+        <div class="ci">📦</div>
+        <div>
+          <div class="cn">{{ p.Name }}</div>
+          <div class="cc">{{ p.CategoryName || '—' }}</div>
+        </div>
+      </div>
+      <div class="card-right">
+        <div class="qty" [style.color]="qtyColor(p)">{{ p.StockQty }}</div>
+        <div class="ql">units</div>
+        <button class="adj-btn" (click)="prompt(p)">+ Adjust</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="overlay" *ngIf="target">
+  <div class="modal">
+    <div class="mt">Adjust stock — {{ target.Name }}</div>
+    <div class="ms">
+      Current: <strong>{{ target.StockQty }}</strong>
+    </div>
+    <div class="mf">
+      <div class="fg">
+        <label>Qty (+ to add, - to reduce)</label
+        ><input type="number" [(ngModel)]="adjQty" placeholder="e.g. 50" />
+      </div>
+      <div class="fg">
+        <label>Note</label><input [(ngModel)]="adjNote" placeholder="Reason..." />
+      </div>
+      <div class="prev">
+        New total: <strong>{{ target.StockQty + adjQty }}</strong>
+      </div>
+    </div>
+    <div class="mbtns">
+      <button class="cb" (click)="target = null">Cancel</button>
+      <button class="sb" (click)="doAdj()">Save</button>
+    </div>
+  </div>
+</div>

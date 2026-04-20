@@ -1,0 +1,14 @@
+<div class="pos-container">
+  <div class="left">
+    <app-category-tabs />
+    <div class="products">
+      @for (product of store.filteredProducts(); track product.id) {
+        <app-product-card [product]="product" />
+      }
+    </div>
+  </div>
+
+  <div class="right">
+    <app-invoice-panel />
+  </div>
+</div>

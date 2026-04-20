@@ -1,0 +1,441 @@
+<div class="product-main" [style.background-image]="'url(bg1.png)'">
+  <app-header pageTitle="Products" />
+
+  <div class="products-page">
+    <!-- ── Category sidebar (right) ── -->
+    <!-- <aside class="cat-sidebar">
+    <div class="cat-label">Categories</div>
+    <button
+      class="cat-btn"
+      [class.active]="selectedCategoryId === null"
+      (click)="filterByCategory(null)"
+    >
+      All products
+      <span class="cat-count">{{ stats.total }}</span>
+    </button>
+    <button
+      class="cat-btn"
+      *ngFor="let c of categories"
+      [class.active]="selectedCategoryId === c.Id"
+      (click)="filterByCategory(c.Id)"
+    >
+      {{ c.Name }}
+    </button>
+
+    <div class="cat-add">
+      <input
+        class="cat-input"
+        [(ngModel)]="newCategoryName"
+        placeholder="New category..."
+        (keyup.enter)="addCategory()"
+      />
+      <button class="cat-add-btn" (click)="addCategory()">+</button>
+    </div>
+  </aside> -->
+    <app-product-sidebar
+      [view]="mapPanelToView(panel)"
+      [lowStockCount]="stats.lowStock"
+      (viewChange)="onSidebarChange($event)"
+    >
+    </app-product-sidebar>
+
+    <!-- ── Main content ── -->
+    <div class="main">
+      <!-- Topbar -->
+
+      <!-- ═══ PANEL: Product list ═══ -->
+      <div class="panel-body" *ngIf="panel === 'list'">
+        <!-- Stat cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon si-blue">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+              </svg>
+            </div>
+            <div class="stat-body">
+              <span class="stat-lbl">Total Products</span>
+              <span class="stat-val">{{ stats.total }}</span>
+              <span class="stat-sub">All active items</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon si-red">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path
+                  d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </div>
+            <div class="stat-body">
+              <span class="stat-lbl">Low Stock</span>
+              <span class="stat-val danger">{{ stats.lowStock }}</span>
+              <span class="stat-sub">Below threshold</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon si-amber">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <div class="stat-body">
+              <span class="stat-lbl">Out of Stock</span>
+              <span class="stat-val danger">{{ stats.outOfStock }}</span>
+              <span class="stat-sub">Needs restocking</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon si-green">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+            </div>
+            <div class="stat-body">
+              <span class="stat-lbl">Categories</span>
+              <span class="stat-val">{{ stats.categories }}</span>
+              <span class="stat-sub">Product groups</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="search-wrap">
+            <span class="search-icon">
+              <svg
+                width="14"
+                height="14"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </span>
+            <input
+              class="search-input"
+              [(ngModel)]="searchQuery"
+              (ngModelChange)="onSearch()"
+              placeholder="Search by name, barcode or SKU…"
+            />
+          </div>
+          <select
+            class="filter-sel"
+            [(ngModel)]="selectedCategoryId"
+            (ngModelChange)="filterByCategory($event)"
+          >
+            <option [ngValue]="null">All Categories</option>
+            <option *ngFor="let c of categories" [ngValue]="c.Id">{{ c.Name }}</option>
+          </select>
+          <button class="add-btn" (click)="openAdd()">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="16" />
+              <line x1="8" y1="12" x2="16" y2="12" />
+            </svg>
+            Add Product
+          </button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-card">
+          <div class="t-head">
+            <div class="th">#</div>
+            <div class="th">Product</div>
+            <div class="th">Category</div>
+            <div class="th">Price</div>
+            <div class="th">Stock</div>
+            <div class="th">Status</div>
+            <div class="th">Actions</div>
+          </div>
+
+          <div class="t-row" *ngFor="let p of products; let i = index">
+            <div class="td td-num">{{ i + 1 }}</div>
+            <div class="td td-product">
+              <div class="p-thumb">{{ p.Name[0] }}</div>
+              <div>
+                <div class="p-name">{{ p.Name }}</div>
+                <div class="p-bc">{{ p.Barcode || p.SKU || '—' }}</div>
+              </div>
+            </div>
+            <div class="td">
+              <span class="cat-pill" [ngClass]="catPillClass(p.CategoryName)">
+                {{ p.CategoryName || '—' }}
+              </span>
+            </div>
+            <div class="td">
+              <span class="price-val">${{ p.Price | number: '1.2-2' }}</span>
+            </div>
+            <div class="td">
+              <span [class]="stockClass(p.StockQty)">
+                {{ p.StockQty }}{{ stockStatus(p.StockQty) === 'low' ? ' ▲low' : '' }}
+              </span>
+            </div>
+            <div class="td">
+              <span
+                class="status-pill"
+                [class.s-active]="!p.IsDeleted"
+                [class.s-inactive]="p.IsDeleted"
+              >
+                <span class="s-dot"></span>{{ p.IsDeleted ? 'Inactive' : 'Active' }}
+              </span>
+            </div>
+            <div class="td">
+              <div class="row-acts">
+                <button class="icon-btn edit-btn" (click)="openEdit(p)" title="Edit">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                </button>
+                <button class="icon-btn stock-btn" (click)="openStock(p)" title="Adjust stock">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </button>
+                <button class="icon-btn del-btn" (click)="deleteConfirmId = p.Id" title="Delete">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="t-row" *ngIf="products.length === 0">
+            <div class="td empty-row" style="grid-column: 1/-1; text-align: center; padding: 32px">
+              No products found
+            </div>
+          </div>
+
+          <!-- Pagination info -->
+          <div class="pagination">
+            <span class="pg-info"
+              >{{ products.length }} product{{ products.length !== 1 ? 's' : '' }}</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ PANEL: Add / Edit form ═══ -->
+      <div class="panel-body form-panel" *ngIf="panel === 'add' || panel === 'edit'">
+        <div class="form-header">
+          <h2 class="form-title">{{ editingId ? 'Edit product' : 'Add new product' }}</h2>
+          <!-- <button class="cancel-btn" (click)="panel = 'list'">Cancel</button> -->
+        </div>
+
+        <div class="form-grid">
+          <div class="form-section">
+            <div class="section-label">Basic info</div>
+            <div class="row-2">
+              <div class="fg full">
+                <label>Product name *</label>
+                <input [(ngModel)]="form.name" placeholder="e.g. Kinder Chocolate 50g" />
+              </div>
+            </div>
+            <div class="row-2">
+              <div class="fg">
+                <label>Category</label>
+                <select [(ngModel)]="form.categoryId">
+                  <option [ngValue]="null">— No category —</option>
+                  <option *ngFor="let c of categories" [ngValue]="c.Id">{{ c.Name }}</option>
+                </select>
+              </div>
+              <div class="fg">
+                <label>SKU / Code</label>
+                <input [(ngModel)]="form.sku" placeholder="SKU-001" />
+              </div>
+            </div>
+            <div class="row-2">
+              <div class="fg">
+                <label>Barcode</label>
+                <div class="input-row">
+                  <input [(ngModel)]="form.barcode" placeholder="8699432205972" />
+                  <button class="scan-btn" (click)="scanBarcode()">Scan</button>
+                </div>
+              </div>
+              <div class="fg">
+                <label>Barcode 2</label>
+                <input [(ngModel)]="form.barcode2" placeholder="Optional second barcode" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-label">Pricing & VAT</div>
+            <div class="row-2">
+              <div class="fg">
+                <label>Selling price ($) *</label>
+                <input type="number" [(ngModel)]="form.price" placeholder="0.00" />
+              </div>
+              <div class="fg">
+                <label>VAT rate (%)</label>
+                <select [(ngModel)]="form.vatRate">
+                  <option [ngValue]="0">0% — No VAT</option>
+                  <option [ngValue]="10">10% — Standard</option>
+                  <option [ngValue]="5">5% — Reduced</option>
+                </select>
+              </div>
+            </div>
+            <div class="row-2">
+              <div class="fg">
+                <label>VAT inclusive?</label>
+                <label class="toggle">
+                  <input type="checkbox" [(ngModel)]="form.isVATInclusive" />
+                  <span class="toggle-track"></span>
+                  <span class="toggle-lbl">{{
+                    form.isVATInclusive ? 'Price includes VAT' : 'VAT added on top'
+                  }}</span>
+                </label>
+              </div>
+              <div class="fg" *ngIf="form.price && form.vatRate">
+                <label>Price preview</label>
+                <div class="price-preview">
+                  <span *ngIf="!form.isVATInclusive">
+                    ${{ form.price }} + {{ form.vatRate }}% =
+                    <strong>${{ form.price * (1 + form.vatRate / 100) | number: '1.2-2' }}</strong>
+                  </span>
+                  <span *ngIf="form.isVATInclusive">
+                    ${{ form.price }} incl. VAT (net ${{
+                      form.price / (1 + form.vatRate / 100) | number: '1.2-2'
+                    }})
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-label">Stock</div>
+            <div class="row-3">
+              <div class="fg">
+                <label>Opening stock</label>
+                <input type="number" [(ngModel)]="form.stockQty" placeholder="0" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-label">Audit log</div>
+            <div class="fg">
+              <label>Note (optional)</label>
+              <input [(ngModel)]="form.log" placeholder="e.g. Initial entry by admin" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="cancel-btn" (click)="panel = 'list'">Cancel</button>
+          <button class="save-btn" (click)="save()" [disabled]="saving">
+            {{ saving ? 'Saving...' : editingId ? 'Update product' : 'Save product' }}
+          </button>
+        </div>
+      </div>
+      <!-- ═══ PANEL: Categories ═══ -->
+      <div class="panel-body" *ngIf="panel === 'categories'">
+        <app-categories
+          [categories]="categories"
+          [products]="products"
+          (add)="addCategoryFromSidebar($event)"
+          (delete)="deleteCategory($event)"
+        >
+        </app-categories>
+      </div>
+      <!-- ═══ PANEL: Low stock alerts ═══ -->
+      <div class="panel-body" *ngIf="panel === 'low-stock'">
+        <app-low-stock-alerts [products]="products" />
+      </div>
+      <!-- ═══ PANEL: Stock movements ═══ -->
+      <div class="panel-body" *ngIf="panel === 'stock-movements'">
+        <app-stock-movements [movements]="movements" />
+      </div>
+      <!-- ═══ PANEL: Import CSV ═══ -->
+      <div class="panel-body" *ngIf="panel === 'import-csv'">
+        <app-import-csv [companyId]="companyId" (imported)="load()" />
+      </div>
+
+      <!-- ═══ PANEL: Export ═══ -->
+      <div class="panel-body" *ngIf="panel === 'export'">
+        <app-export [products]="products" [categories]="categories" />
+      </div>
+      <!-- ═══ PANEL: Stock adjust ═══ -->
+      <div class="panel-body form-panel" *ngIf="panel === 'stock'">
+        <div class="form-header">
+          <h2 class="form-title">Adjust stock — {{ stockProduct?.Name }}</h2>
+          <button class="cancel-btn" (click)="panel = 'list'">Cancel</button>
+        </div>
+        <div class="stock-info">
+          <div class="stock-current">
+            <span class="sc-label">Current stock</span>
+            <span class="sc-val">{{ stockProduct?.StockQty }}</span>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-section">
+            <div class="section-label">Adjustment</div>
+            <div class="row-2">
+              <div class="fg">
+                <label>Quantity (use negative to reduce)</label>
+                <input type="number" [(ngModel)]="stockQty" placeholder="e.g. 50 or -10" />
+              </div>
+              <div class="fg">
+                <label>New total will be</label>
+                <div class="price-preview">
+                  <strong>{{ (stockProduct?.StockQty || 0) + stockQty }}</strong> units
+                </div>
+              </div>
+            </div>
+            <div class="fg">
+              <label>Reason / note</label>
+              <input [(ngModel)]="stockNote" placeholder="e.g. Received new stock from supplier" />
+            </div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="cancel-btn" (click)="panel = 'list'">Cancel</button>
+          <button class="save-btn" (click)="saveStock()">Save adjustment</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete confirm overlay -->
+  <div class="overlay" *ngIf="deleteConfirmId !== null">
+    <div class="confirm-modal">
+      <div class="confirm-icon">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#E24B4A"
+          stroke-width="2"
+        >
+          <path
+            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+          />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      </div>
+      <div class="confirm-title">Delete product?</div>
+      <div class="confirm-sub">This product will be soft deleted and hidden from all views.</div>
+      <div class="confirm-actions">
+        <button class="cancel-btn" (click)="deleteConfirmId = null">Cancel</button>
+        <button class="del-confirm-btn" (click)="deleteProduct(deleteConfirmId!)">
+          Yes, delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

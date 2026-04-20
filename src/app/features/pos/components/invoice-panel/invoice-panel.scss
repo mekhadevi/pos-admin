@@ -1,0 +1,181 @@
+.invoice-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 24px;
+  background: #ffffff;
+
+  .invoice-title {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+
+  .cart-items {
+    flex: 1;
+    overflow-y: auto;
+
+    .cart-item {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+
+      .item-thumb {
+        width: 70px;
+        height: 70px;
+        border-radius: 12px;
+        object-fit: cover;
+      }
+      .item-info {
+        flex: 1;
+        .item-name {
+          font-weight: 600;
+          display: block;
+          font-size: 15px;
+        }
+        .item-note {
+          font-size: 11px;
+          color: #a1a1a1;
+          display: block;
+          margin-bottom: 4px;
+        }
+        .item-price-qty {
+          color: #3b82f6;
+          font-weight: 600;
+        }
+      }
+      .item-actions {
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        .total-price {
+          font-weight: 700;
+          color: #111;
+        }
+      }
+    }
+  }
+
+  .payment-summary {
+    border-top: 1px solid #f1f1f1;
+    padding-top: 20px;
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      color: #666;
+      &.grand-total {
+        color: #111;
+        font-size: 18px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px dashed #eee;
+      }
+    }
+  }
+
+  .payment-methods {
+    display: flex;
+    gap: 8px;
+    margin: 20px 0;
+    button {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      background: white;
+      font-size: 12px;
+      cursor: pointer;
+      &.active {
+        border-color: #3b82f6;
+        color: #3b82f6;
+        background: #eff6ff;
+      }
+      i {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 16px;
+      }
+    }
+  }
+
+  .btn-place-order {
+    width: 100%;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+  }
+}
+
+// Qty Control styling
+.qty-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  padding: 4px 8px;
+  border-radius: 20px;
+  button {
+    border: none;
+    background: #3b82f6;
+    color: white;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+}
+
+// PRINT LOGIC
+/* invoice-panel.scss */
+
+// 1. Hide the receipt section during normal browsing
+/* Hide the receipt during normal web browsing */
+.print-only {
+  display: none;
+}
+
+// @media print {
+//   /* 1. Hide the entire application UI and all its parents */
+
+//   /* 2. Target the receipt specifically and force it back into existence */
+//   #print-receipt,
+//   #print-receipt * {
+//     visibility: visible !important;
+//   }
+
+//   /* 3. Style the receipt for the paper */
+//   #print-receipt {
+//     display: block !important;
+//     position: absolute;
+//     left: 0;
+//     top: 0;
+//     width: 100%;
+//     max-width: 80mm; /* Standard thermal printer width */
+//     margin: 0;
+//     padding: 10px;
+//     background: white;
+//     font-family: 'Courier New', Courier, monospace;
+//     font-size: 14px;
+//     line-height: 1.4;
+
+//     table {
+//       display: table !important; /* Tables need display: table to render rows */
+//       tr {
+//         display: table-row !important;
+//       }
+//       td,
+//       th {
+//         display: table-cell !important;
+//         padding: 5px 0;
+//       }
+//     }
+//   }
+// }

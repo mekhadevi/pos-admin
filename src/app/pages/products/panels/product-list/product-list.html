@@ -1,0 +1,130 @@
+<div class="list-wrap">
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th style="width: 44px">#</th>
+        <th>Name</th>
+        <th style="width: 110px">Category</th>
+        <th style="width: 130px">Barcode</th>
+        <th style="width: 90px">SKU</th>
+        <th style="width: 80px">Price</th>
+        <th style="width: 110px">VAT</th>
+        <th style="width: 80px">Stock</th>
+        <th style="width: 130px">Updated</th>
+        <th style="width: 96px">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of products">
+        <td class="td-id">{{ p.Id }}</td>
+        <td class="td-name">{{ p.Name }}</td>
+        <td>
+          <span class="cat-tag">{{ p.CategoryName || '—' }}</span>
+        </td>
+        <td class="mono">{{ p.Barcode || '—' }}</td>
+        <td class="mono">{{ p.SKU || '—' }}</td>
+        <td class="td-price">\${{ p.Price | number: '1.2-2' }}</td>
+        <td>
+          <span class="vbadge" [class.inc]="p.IsVATInclusive">
+            {{ p.VATRate }}% {{ p.IsVATInclusive ? 'incl.' : 'excl.' }}
+          </span>
+        </td>
+        <td>
+          <span class="sbadge" [ngClass]="stockClass(p)">{{ p.StockQty }}</span>
+        </td>
+        <td class="td-date">{{ p.UpdatedAt | date: 'dd MMM, HH:mm' }}</td>
+        <td>
+          <div class="act-row">
+            <button class="ab e" (click)="edit.emit(p)" title="Edit">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+            </button>
+            <button class="ab s" (click)="promptStock(p)" title="Adjust stock">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+            <button class="ab d" (click)="confirmId = p.Id; confirmName = p.Name" title="Delete">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14H6L5 6" />
+              </svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+      <tr *ngIf="products.length === 0">
+        <td colspan="10" class="empty">No products found</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Delete confirm -->
+<div class="overlay" *ngIf="confirmId !== null">
+  <div class="modal">
+    <div class="modal-ico">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#E24B4A" stroke-width="2">
+        <path
+          d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+        />
+        <line x1="12" y1="9" x2="12" y2="13" />
+      </svg>
+    </div>
+    <div class="modal-title">Delete product?</div>
+    <div class="modal-sub">"{{ confirmName }}" will be soft deleted.</div>
+    <div class="modal-btns">
+      <button class="cancel-btn" (click)="confirmId = null">Cancel</button>
+      <button class="del-btn" (click)="doDelete()">Yes, delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Stock adjust -->
+<div class="overlay" *ngIf="showStockModal">
+  <div class="modal">
+    <div class="modal-title">Adjust stock</div>
+    <div class="modal-sub">{{ stockProduct.Name }} — Current: {{ stockProduct.StockQty }}</div>
+    <div class="stock-fields">
+      <div class="sf-group">
+        <label>Adjustment qty</label>
+        <input type="number" [(ngModel)]="stockQty" placeholder="e.g. 50 or -10" />
+      </div>
+      <div class="sf-group">
+        <label>Note</label>
+        <input [(ngModel)]="stockNote" placeholder="e.g. Received from supplier" />
+      </div>
+      <div class="sf-preview">
+        New total: <strong>{{ stockProduct.StockQty + stockQty }}</strong>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="cancel-btn" (click)="showStockModal = false">Cancel</button>
+      <button class="save-btn" (click)="doStock()">Save adjustment</button>
+    </div>
+  </div>
+</div>

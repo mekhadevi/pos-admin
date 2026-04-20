@@ -1,0 +1,54 @@
+<header class="pos-header">
+  <div class="header-left">
+    <button class="back-btn" (click)="goBack()">
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <polyline points="15 18 9 12 15 6" />
+      </svg>
+    </button>
+    <div class="brand">
+      <span class="brand-name">RetailPOS</span>
+      <span class="brand-tag">Pro</span>
+    </div>
+    <span class="page-title">{{ pageTitle }}</span>
+  </div>
+
+  <div class="header-right">
+    <div class="status-pill" [class.offline]="!isOnline">
+      <span class="dot"></span>
+      {{ isOnline ? 'Online' : 'Offline' }}
+    </div>
+
+    <div class="weather-chip" *ngIf="temperature">
+      <span class="weather-temp">{{ temperature }}</span>
+    </div>
+
+    <div class="user-chip">
+      <div class="user-avatar">{{ userInitial }}</div>
+      <div class="user-info">
+        <span class="user-name">{{ userName }}</span>
+        <span class="user-role">{{ userRole }}</span>
+      </div>
+      <button class="logout-btn" (click)="logout()" title="Logout">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
