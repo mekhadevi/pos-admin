@@ -1,31 +1,41 @@
 <aside class="sidebar">
   <div class="grp">
     <div class="grp-lbl">Products</div>
-    <button class="nav" [class.act]="view === 'list'" (click)="go('list')">Product list</button>
-    <button class="nav" [class.act]="view === 'add'" (click)="go('add')">Add product</button>
+    <button class="nav" [class.act]="view === 'list'" (click)="go('list')">
+      <i class="fa-solid fa-list"></i> Product list
+    </button>
+    <button class="nav" [class.act]="view === 'add'" (click)="go('add')">
+      <i class="fa-solid fa-dolly"></i> Add product
+    </button>
     <button class="nav" [class.act]="view === 'categories'" (click)="go('categories')">
+      <i class="fa-solid fa-table-cells-large"></i>
       Categories
     </button>
   </div>
   <div class="grp">
     <div class="grp-lbl">Stock</div>
     <button class="nav" [class.act]="view === 'stock-levels'" (click)="go('stock-levels')">
+      <i class="fa-solid fa-cubes"></i>
       Stock levels
     </button>
     <button class="nav" [class.act]="view === 'low-stock'" (click)="go('low-stock')">
+      <i class="fa-solid fa-arrow-trend-down"></i>
       Low stock alerts
       <span class="nb" *ngIf="lowStockCount > 0">{{ lowStockCount }}</span>
     </button>
     <button class="nav" [class.act]="view === 'stock-movements'" (click)="go('stock-movements')">
+      <i class="fa-solid fa-money-bill-trend-up"></i>
       Stock movements
     </button>
   </div>
   <div class="grp">
     <div class="grp-lbl">Import</div>
     <button class="nav" [class.act]="view === 'import-csv'" (click)="go('import-csv')">
+      <i class="fa-solid fa-download"></i>
       Import CSV
     </button>
     <button class="nav" [class.act]="view === 'export'" (click)="go('export')">
+      <i class="fa-solid fa-upload"></i>
       Export products
     </button>
   </div>

@@ -1,0 +1,893 @@
+<!-- backup.html -->
+<div class="bk-page" [style.background-image]="'url(bg.png)'">
+  <app-header pageTitle="Backup & Restore" />
+
+  <!-- ── TOAST ── -->
+  <div class="toast" *ngIf="toastMsg" [ngClass]="'toast-' + toastType">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.5"
+      *ngIf="toastType === 'success'"
+    >
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.5"
+      *ngIf="toastType === 'error'"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <line x1="15" y1="9" x2="9" y2="15" />
+      <line x1="9" y1="9" x2="15" y2="15" />
+    </svg>
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.5"
+      *ngIf="toastType === 'info'"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+    {{ toastMsg }}
+  </div>
+
+  <div class="bk-body">
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="sidebar">
+      <nav>
+        <div class="nav-section">Backup</div>
+        <div class="nav-item" [class.active]="view === 'overview'" (click)="setView('overview')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+          </svg>
+          Overview
+        </div>
+        <div class="nav-item" [class.active]="view === 'history'" (click)="setView('history')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+            <polyline points="17 6 23 6 23 12" />
+          </svg>
+          Backup history
+          <span class="nav-badge blue" *ngIf="dbInfo?.totalBackups">{{
+            dbInfo?.totalBackups
+          }}</span>
+        </div>
+
+        <div class="nav-section">Restore</div>
+        <div class="nav-item" [class.active]="view === 'restore'" (click)="setView('restore')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polyline points="1 4 1 10 7 10" />
+            <path d="M3.51 15a9 9 0 1 0 .49-3.67" />
+          </svg>
+          Restore database
+        </div>
+
+        <div class="nav-section">Settings</div>
+        <div class="nav-item" [class.active]="view === 'schedule'" (click)="setView('schedule')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          Auto backup
+          <span class="nav-badge green" *ngIf="schedule.enabled">On</span>
+        </div>
+        <div class="nav-item" [class.active]="view === 'database'" (click)="setView('database')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <ellipse cx="12" cy="5" rx="9" ry="3" />
+            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+          </svg>
+          Database info
+        </div>
+      </nav>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <main class="bk-main">
+      <!-- ════════════════════════════════════════════════
+           OVERVIEW
+      ════════════════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'overview'">
+        <div class="topbar">
+          <h2>Backup &amp; Restore</h2>
+          <button
+            class="btn primary"
+            (click)="createBackup()"
+            [disabled]="creating"
+            [class.success]="createSuccess"
+          >
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            {{ creating ? 'Creating…' : createSuccess ? '✓ Done!' : 'Create backup now' }}
+          </button>
+          <button class="btn" (click)="openFolder()">Open backup folder</button>
+        </div>
+        <div class="content">
+          <!-- Health banner -->
+          <div class="health-banner" [ngClass]="'health-' + healthStatus">
+            <div class="health-icon">
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                *ngIf="healthStatus === 'good'"
+              >
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                *ngIf="healthStatus === 'warn'"
+              >
+                <path
+                  d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                *ngIf="healthStatus === 'bad'"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <div class="health-text">
+              <strong *ngIf="healthStatus === 'good'">Backup is healthy</strong>
+              <strong *ngIf="healthStatus === 'warn'">Backup is overdue</strong>
+              <strong *ngIf="healthStatus === 'bad'">No recent backup</strong>
+              <span
+                >Last backup: {{ lastBackupAgo }}
+                <ng-container *ngIf="dbInfo?.lastBackup">
+                  — {{ formatDate(dbInfo!.lastBackup!) }}</ng-container
+                >
+              </span>
+            </div>
+            <div class="health-action">
+              <span class="sched-indicator" *ngIf="schedule.enabled">
+                <span class="dot-green"></span> Auto backup {{ schedule.frequency }}
+              </span>
+              <button class="btn-sm" (click)="setView('schedule')" *ngIf="!schedule.enabled">
+                Enable auto backup
+              </button>
+            </div>
+          </div>
+
+          <!-- Stat cards -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon si-blue">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <ellipse cx="12" cy="5" rx="9" ry="3" />
+                  <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Database size</span>
+                <span class="stat-val">{{ dbInfo?.dbSizeLabel ?? '—' }}</span>
+                <span class="stat-sub">{{ dbInfo?.dbPath | dbName }}</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-green">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Backup files</span>
+                <span class="stat-val">{{ dbInfo?.backupCount ?? 0 }}</span>
+                <span class="stat-sub">{{ dbInfo?.backupDirSizeLabel }} on disk</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-amber">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Auto backup</span>
+                <span
+                  class="stat-val"
+                  [class.green]="schedule.enabled"
+                  [class.red]="!schedule.enabled"
+                >
+                  {{ schedule.enabled ? 'On' : 'Off' }}
+                </span>
+                <span class="stat-sub">{{
+                  schedule.enabled ? schedule.frequency : 'Disabled'
+                }}</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-purple">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Total log entries</span>
+                <span class="stat-val">{{ dbInfo?.totalBackups ?? 0 }}</span>
+                <span class="stat-sub">Backup events</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick backup -->
+          <div class="card">
+            <div class="card-head">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#185FA5"
+                stroke-width="2"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              <h3>Create a backup</h3>
+            </div>
+            <div class="quick-backup-body">
+              <div class="qb-field">
+                <label>Label (optional)</label>
+                <input
+                  [(ngModel)]="createLabel"
+                  class="form-input"
+                  placeholder="e.g. before-update, end-of-day…"
+                  style="width: 300px"
+                />
+              </div>
+              <button
+                class="btn primary large"
+                (click)="createBackup()"
+                [disabled]="creating"
+                [class.success]="createSuccess"
+              >
+                {{
+                  creating
+                    ? 'Creating backup…'
+                    : createSuccess
+                      ? '✓ Backup created!'
+                      : 'Create backup now'
+                }}
+              </button>
+            </div>
+            <div class="qb-info">
+              Backups are saved to: <code>{{ dbInfo?.backupDir ?? '…' }}</code>
+              <button class="btn-link" (click)="openFolder()">Open folder</button>
+            </div>
+          </div>
+
+          <!-- Recent backups -->
+          <div class="card">
+            <div class="card-head">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#185FA5"
+                stroke-width="2"
+              >
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+              </svg>
+              <h3>Recent backup events</h3>
+              <button class="btn-sm" (click)="setView('history')">View all</button>
+            </div>
+            <div class="empty-state" *ngIf="history.length === 0">No backups yet</div>
+            <table class="table" *ngIf="history.length > 0">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Label</th>
+                  <th>Size</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let h of history | slice: 0 : 6">
+                  <td class="td-muted">{{ formatDate(h.createdAt) }}</td>
+                  <td>
+                    <span class="label-chip" [ngClass]="labelClass(h.label)">{{ h.label }}</span>
+                  </td>
+                  <td class="td-muted">{{ h.sizeLabel }}</td>
+                  <td>
+                    <span class="pill" [ngClass]="statusClass(h.status)">{{
+                      statusLabel(h.status)
+                    }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ════════════════════════════════════════════════
+           BACKUP HISTORY
+      ════════════════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'history'">
+        <div class="topbar">
+          <h2>Backup history</h2>
+          <button class="btn primary" (click)="createBackup()" [disabled]="creating">
+            {{ creating ? 'Creating…' : '+ Create backup' }}
+          </button>
+          <button class="btn" (click)="clearLog()">Clear log</button>
+        </div>
+        <div class="content">
+          <div class="card">
+            <div class="empty-state" *ngIf="history.length === 0">No backup history yet</div>
+            <table class="table" *ngIf="history.length > 0">
+              <thead>
+                <tr>
+                  <th>Date &amp; time</th>
+                  <th>Filename</th>
+                  <th>Label</th>
+                  <th>Size</th>
+                  <th>Status</th>
+                  <th>File</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let h of history">
+                  <td class="td-muted">{{ formatDate(h.createdAt) }}</td>
+                  <td class="td-filename">{{ h.filename }}</td>
+                  <td>
+                    <span class="label-chip" [ngClass]="labelClass(h.label)">{{ h.label }}</span>
+                  </td>
+                  <td class="td-muted">{{ h.sizeLabel }}</td>
+                  <td>
+                    <span class="pill" [ngClass]="statusClass(h.status)">{{
+                      statusLabel(h.status)
+                    }}</span>
+                    <span class="err-hint" *ngIf="h.error" [title]="h.error"
+                      >⚠ {{ h.error | slice: 0 : 40 }}</span
+                    >
+                  </td>
+                  <td>
+                    <span class="file-exists" *ngIf="h.exists">✓ On disk</span>
+                    <span class="file-missing" *ngIf="h.filename && !h.exists">✕ Missing</span>
+                    <span class="td-muted" *ngIf="!h.filename">—</span>
+                  </td>
+                  <td>
+                    <div class="action-btns" *ngIf="h.exists && h.filename">
+                      <button
+                        class="btn-sm"
+                        (click)="
+                          exportBackup({
+                            filename: h.filename,
+                            path: h.path,
+                            size: h.size,
+                            sizeLabel: h.sizeLabel,
+                            createdAt: h.createdAt,
+                            modifiedAt: h.createdAt,
+                          })
+                        "
+                      >
+                        Export
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ════════════════════════════════════════════════
+           RESTORE DATABASE
+      ════════════════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'restore'">
+        <div class="topbar">
+          <h2>Restore database</h2>
+          <button class="btn" (click)="restoreFromFile()" [disabled]="restoring">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+            Restore from file…
+          </button>
+        </div>
+        <div class="content">
+          <!-- Warning -->
+          <div class="warn-banner">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+              />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            <span
+              ><strong>Warning:</strong> Restoring replaces your current database. A safety backup
+              is automatically created before any restore. The app must be restarted
+              afterward.</span
+            >
+          </div>
+
+          <!-- Restore confirm panel -->
+          <div class="restore-confirm-panel" *ngIf="restoreTarget">
+            <div class="restore-confirm-header">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#dc2626"
+                stroke-width="2"
+              >
+                <polyline points="1 4 1 10 7 10" />
+                <path d="M3.51 15a9 9 0 1 0 .49-3.67" />
+              </svg>
+              <span
+                >Confirm restore: <strong>{{ restoreTarget.filename }}</strong></span
+              >
+            </div>
+            <div class="restore-confirm-details">
+              <span>Size: {{ restoreTarget.sizeLabel }}</span>
+              <span>Created: {{ formatDate(restoreTarget.createdAt) }}</span>
+            </div>
+            <div class="restore-confirm-actions">
+              <label class="checkbox-label">
+                <input type="checkbox" [(ngModel)]="restoreConfirm" />
+                I understand this will replace the current database
+              </label>
+              <button
+                class="btn red"
+                (click)="confirmRestore()"
+                [disabled]="!restoreConfirm || restoring"
+              >
+                {{ restoring ? 'Restoring…' : 'Confirm restore' }}
+              </button>
+              <button class="btn" (click)="restoreTarget = null; restoreConfirm = false">
+                Cancel
+              </button>
+            </div>
+          </div>
+
+          <!-- Backup files list -->
+          <div class="card">
+            <div class="card-head">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#185FA5"
+                stroke-width="2"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              <h3>Available backups</h3>
+              <span class="card-count">{{ files.length }} files</span>
+              <button class="btn-sm" (click)="openFolder()">Open folder</button>
+            </div>
+            <div class="empty-state" *ngIf="files.length === 0">
+              No backup files found. Create a backup first.
+            </div>
+            <table class="table" *ngIf="files.length > 0">
+              <thead>
+                <tr>
+                  <th>Filename</th>
+                  <th>Size</th>
+                  <th>Created</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  *ngFor="let f of files; trackBy: trackByFile"
+                  [class.restore-selected]="restoreTarget?.filename === f.filename"
+                >
+                  <td>
+                    <div class="file-row">
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#185FA5"
+                        stroke-width="2"
+                      >
+                        <ellipse cx="12" cy="5" rx="9" ry="3" />
+                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                      </svg>
+                      <span class="td-filename">{{ f.filename }}</span>
+                    </div>
+                  </td>
+                  <td class="td-muted">{{ f.sizeLabel }}</td>
+                  <td class="td-muted">{{ formatDate(f.createdAt) }}</td>
+                  <td>
+                    <div class="action-btns">
+                      <button class="btn-sm primary" (click)="selectRestore(f)">Restore</button>
+                      <button class="btn-sm" (click)="exportBackup(f)">Export</button>
+                      <button class="btn-sm red" (click)="deleteBackup(f)">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ════════════════════════════════════════════════
+           AUTO BACKUP SCHEDULE
+      ════════════════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'schedule'">
+        <div class="topbar">
+          <h2>Auto backup schedule</h2>
+          <button
+            class="btn primary"
+            (click)="saveSchedule()"
+            [disabled]="schedSaving"
+            [class.success]="schedSuccess"
+          >
+            {{ schedSaving ? 'Saving…' : schedSuccess ? '✓ Saved!' : 'Save schedule' }}
+          </button>
+        </div>
+        <div class="content">
+          <div class="card form-card">
+            <div class="card-head">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#185FA5"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              <h3>Backup schedule settings</h3>
+            </div>
+
+            <div class="sched-body">
+              <!-- Enable toggle -->
+              <div class="sched-toggle-row">
+                <div class="sched-toggle-label">
+                  <strong>Automatic backups</strong>
+                  <span>When enabled, backups run automatically in the background</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" [(ngModel)]="schedule.enabled" />
+                  <span class="toggle-track">
+                    <span class="toggle-thumb"></span>
+                  </span>
+                </label>
+              </div>
+
+              <div class="sched-fields" [class.sched-disabled]="!schedule.enabled">
+                <div class="form-grid three-col">
+                  <div class="form-field">
+                    <label>Frequency</label>
+                    <select
+                      [(ngModel)]="schedule.frequency"
+                      class="form-select"
+                      [disabled]="!schedule.enabled"
+                    >
+                      <option value="hourly">Every hour</option>
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                    </select>
+                  </div>
+                  <div class="form-field">
+                    <label>Run time</label>
+                    <input
+                      type="time"
+                      [(ngModel)]="schedule.time"
+                      class="form-input"
+                      [disabled]="!schedule.enabled"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label>Keep last N backups</label>
+                    <input
+                      type="number"
+                      [(ngModel)]="schedule.retainCount"
+                      class="form-input"
+                      min="1"
+                      max="99"
+                      [disabled]="!schedule.enabled"
+                      placeholder="7"
+                    />
+                  </div>
+                </div>
+
+                <!-- Status row -->
+                <div class="sched-status" *ngIf="schedule.enabled">
+                  <div class="sched-stat">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                    </svg>
+                    <span
+                      >Last run:
+                      <strong>{{
+                        schedule.lastRun ? formatDate(schedule.lastRun) : 'Never'
+                      }}</strong></span
+                    >
+                  </div>
+                  <div class="sched-stat">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    <span
+                      >Next run:
+                      <strong>{{
+                        schedule.nextRun ? formatDate(schedule.nextRun) : '—'
+                      }}</strong></span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-footer">
+              <button
+                class="btn primary"
+                (click)="saveSchedule()"
+                [disabled]="schedSaving"
+                [class.success]="schedSuccess"
+              >
+                {{ schedSaving ? 'Saving…' : schedSuccess ? '✓ Saved!' : 'Save schedule' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Tips -->
+          <div class="tips-card">
+            <div class="tip">
+              <div class="tip-icon">💡</div>
+              <div>
+                <strong>Daily at 2:00 AM</strong> is the recommended setting for most POS systems.
+              </div>
+            </div>
+            <div class="tip">
+              <div class="tip-icon">🗄️</div>
+              <div>
+                <strong>Keep last 7 backups</strong> gives you a week of recovery points without
+                using too much disk space.
+              </div>
+            </div>
+            <div class="tip">
+              <div class="tip-icon">💾</div>
+              <div>
+                <strong>Export backups</strong> to an external drive or cloud folder regularly for
+                off-site protection.
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ════════════════════════════════════════════════
+           DATABASE INFO
+      ════════════════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'database'">
+        <div class="topbar">
+          <h2>Database information</h2>
+          <button class="btn" (click)="loadDbInfo()">Refresh</button>
+        </div>
+        <div class="content" *ngIf="dbInfo">
+          <div class="stats-grid four-col">
+            <div class="stat-card">
+              <div class="stat-icon si-blue">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <ellipse cx="12" cy="5" rx="9" ry="3" />
+                  <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Products</span>
+                <span class="stat-val">{{ dbInfo.tableCounts['ProductMaster'] | number }}</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-green">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <line x1="12" y1="1" x2="12" y2="23" />
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Sales</span>
+                <span class="stat-val">{{ dbInfo.tableCounts['SaleMaster'] | number }}</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-amber">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Customers</span>
+                <span class="stat-val">{{ dbInfo.tableCounts['CustomerMaster'] | number }}</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-purple">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Suppliers</span>
+                <span class="stat-val">{{ dbInfo.tableCounts['Suppliers'] | number }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="card">
+              <div class="card-head"><h3>Database file</h3></div>
+              <div class="info-list">
+                <div class="info-row">
+                  <span class="info-label">File path</span>
+                  <span class="info-val code-val">{{ dbInfo.dbPath }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">File size</span>
+                  <span class="info-val">{{ dbInfo.dbSizeLabel }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Backup directory</span>
+                  <span class="info-val code-val">{{ dbInfo.backupDir }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Backup files</span>
+                  <span class="info-val"
+                    >{{ dbInfo.backupCount }} files ({{ dbInfo.backupDirSizeLabel }})</span
+                  >
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Last backup</span>
+                  <span class="info-val">{{
+                    dbInfo.lastBackup ? formatDate(dbInfo.lastBackup) : 'Never'
+                  }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h3>Record counts</h3></div>
+              <div class="info-list">
+                <div class="info-row" *ngFor="let t of dbInfo.tableCounts | keyvalue">
+                  <span class="info-label">{{ t.key }}</span>
+                  <span class="info-val">{{ t.value | number }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="content" *ngIf="!dbInfo">
+          <div class="empty-state">Loading database info…</div>
+        </div>
+      </ng-container>
+    </main>
+  </div>
+</div>

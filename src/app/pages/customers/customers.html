@@ -1,0 +1,621 @@
+<!-- customers.html -->
+<div class="cust-page" [style.background-image]="'url(bg.png)'">
+  <app-header pageTitle="Customers" />
+
+  <div class="cust-body">
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="sidebar">
+      <nav>
+        <div class="nav-section">Overview</div>
+        <div class="nav-item" [class.active]="view === 'overview'" (click)="setView('overview')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+          </svg>
+          Overview
+        </div>
+
+        <div class="nav-section">Customers</div>
+        <div class="nav-item" [class.active]="view === 'list'" (click)="setView('list')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          All customers
+          <span class="nav-badge blue">{{ stats.total }}</span>
+        </div>
+        <div class="nav-item" [class.active]="view === 'add'" (click)="openAdd()">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          Add customer
+        </div>
+
+        <div class="nav-section">Loyalty</div>
+        <div class="nav-item" [class.active]="view === 'loyalty'" (click)="setView('loyalty')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polygon
+              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+            />
+          </svg>
+          Loyalty tiers
+          <span class="nav-badge amber" *ngIf="stats.withLoyalty > 0">{{ stats.withLoyalty }}</span>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <main class="cust-main">
+      <!-- ── OVERVIEW ── -->
+      <ng-container *ngIf="view === 'overview'">
+        <div class="topbar">
+          <h2>Customer overview</h2>
+          <button class="btn primary" (click)="openAdd()">+ Add customer</button>
+          <button class="btn" (click)="exportCSV()">Export CSV</button>
+        </div>
+        <div class="content">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon si-blue">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Total customers</span>
+                <span class="stat-val">{{ stats.total }}</span>
+                <span class="stat-sub">All time</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-green">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="8.5" cy="7" r="4" />
+                  <line x1="20" y1="8" x2="20" y2="14" />
+                  <line x1="23" y1="11" x2="17" y2="11" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">New this month</span>
+                <span class="stat-val">{{ stats.newThisMonth }}</span>
+                <span class="stat-sub">Added in {{ currentMonth }}</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-amber">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <line x1="12" y1="1" x2="12" y2="23" />
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Total revenue</span>
+                <span class="stat-val">{{ bd(stats.totalRevenue) }}</span>
+                <span class="stat-sub">From all customers</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-purple">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                  />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Loyalty members</span>
+                <span class="stat-val">{{ stats.withLoyalty }}</span>
+                <span class="stat-sub">With earned points</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top customers table -->
+          <div class="card">
+            <div class="card-head">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#185FA5"
+                stroke-width="2"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+              </svg>
+              <h3>Top customers by spend</h3>
+              <button class="btn-sm" (click)="setView('list')">View all</button>
+            </div>
+            <div class="empty-state" *ngIf="customers.length === 0">
+              No customers yet — add your first!
+            </div>
+            <table class="table" *ngIf="customers.length > 0">
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Phone</th>
+                  <th>Orders</th>
+                  <th>Total spent</th>
+                  <th>Loyalty</th>
+                  <th>Tier</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let c of topBySpend()" class="clickable-row" (click)="openDetail(c)">
+                  <td>
+                    <div class="cust-name-cell">
+                      <div class="avatar" [style.background]="avatarColor(c.Name)">
+                        {{ initials(c.Name) }}
+                      </div>
+                      <span>{{ c.Name }}</span>
+                    </div>
+                  </td>
+                  <td class="td-muted">{{ c.Phone ?? '—' }}</td>
+                  <td>{{ c.TotalOrders }}</td>
+                  <td class="td-spend">{{ bd(c.TotalSpent) }}</td>
+                  <td>{{ c.LoyaltyPoints }} pts</td>
+                  <td>
+                    <span class="tier-pill" [ngClass]="tierClass(c.LoyaltyPoints)">{{
+                      tierLabel(c.LoyaltyPoints)
+                    }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── ALL CUSTOMERS LIST ── -->
+      <ng-container *ngIf="view === 'list'">
+        <div class="topbar">
+          <h2>All customers</h2>
+          <input
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="applyFilter()"
+            placeholder="Search name, phone, email…"
+            class="search-input"
+          />
+          <button class="btn primary" (click)="openAdd()">+ Add customer</button>
+          <button class="btn" (click)="exportCSV()">Export CSV</button>
+        </div>
+        <div class="content">
+          <div class="card">
+            <div class="empty-state" *ngIf="filteredCustomers.length === 0">
+              No customers match your search
+            </div>
+            <table class="table" *ngIf="filteredCustomers.length > 0">
+              <thead>
+                <tr>
+                  <th class="sortable" (click)="sortBy('Name')">Customer {{ sortIcon('Name') }}</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th class="sortable" (click)="sortBy('TotalOrders')">
+                    Orders {{ sortIcon('TotalOrders') }}
+                  </th>
+                  <th class="sortable" (click)="sortBy('TotalSpent')">
+                    Spent {{ sortIcon('TotalSpent') }}
+                  </th>
+                  <th class="sortable" (click)="sortBy('LoyaltyPoints')">
+                    Points {{ sortIcon('LoyaltyPoints') }}
+                  </th>
+                  <th>Tier</th>
+                  <th>Joined</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let c of filteredCustomers">
+                  <td>
+                    <div class="cust-name-cell" (click)="openDetail(c)" style="cursor: pointer">
+                      <div class="avatar" [style.background]="avatarColor(c.Name)">
+                        {{ initials(c.Name) }}
+                      </div>
+                      <span class="td-name">{{ c.Name }}</span>
+                    </div>
+                  </td>
+                  <td class="td-muted">{{ c.Phone ?? '—' }}</td>
+                  <td class="td-muted">{{ c.Email ?? '—' }}</td>
+                  <td>{{ c.TotalOrders }}</td>
+                  <td class="td-spend">{{ bd(c.TotalSpent) }}</td>
+                  <td>{{ c.LoyaltyPoints }}</td>
+                  <td>
+                    <span class="tier-pill" [ngClass]="tierClass(c.LoyaltyPoints)">{{
+                      tierLabel(c.LoyaltyPoints)
+                    }}</span>
+                  </td>
+                  <td class="td-muted">{{ c.CreatedAt | date: 'dd MMM yyyy' }}</td>
+                  <td>
+                    <div class="action-btns">
+                      <button class="btn-sm" (click)="openEdit(c)">Edit</button>
+                      <button class="btn-sm red" (click)="deleteCustomer(c)">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── ADD / EDIT FORM ── -->
+      <ng-container *ngIf="view === 'add'">
+        <div class="topbar">
+          <h2>{{ formMode === 'add' ? 'Add customer' : 'Edit customer' }}</h2>
+          <button class="btn" (click)="setView('list')">← Back</button>
+        </div>
+        <div class="content">
+          <div class="card form-card">
+            <div class="card-head"><h3>Customer details</h3></div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Full name <span class="req">*</span></label>
+                <input [(ngModel)]="form.name" class="form-input" placeholder="John Doe" />
+              </div>
+              <div class="form-field">
+                <label>Phone number</label>
+                <input [(ngModel)]="form.phone" class="form-input" placeholder="+973 3xxx xxxx" />
+              </div>
+              <div class="form-field">
+                <label>Email address</label>
+                <input
+                  [(ngModel)]="form.email"
+                  type="email"
+                  class="form-input"
+                  placeholder="john@example.com"
+                />
+              </div>
+              <div class="form-field full-width">
+                <label>Address</label>
+                <input
+                  [(ngModel)]="form.address"
+                  class="form-input"
+                  placeholder="Street, City, Country"
+                />
+              </div>
+              <div class="form-field full-width">
+                <label>Notes</label>
+                <textarea
+                  [(ngModel)]="form.notes"
+                  class="form-textarea"
+                  rows="3"
+                  placeholder="Optional notes about this customer…"
+                ></textarea>
+              </div>
+              <div class="form-field full-width form-actions">
+                <span class="form-error" *ngIf="formError">{{ formError }}</span>
+                <button
+                  class="btn primary"
+                  (click)="saveCustomer()"
+                  [disabled]="formSaving || !form.name.trim()"
+                  [class.success]="formSuccess"
+                >
+                  {{
+                    formSaving
+                      ? 'Saving…'
+                      : formSuccess
+                        ? '✓ Saved!'
+                        : formMode === 'add'
+                          ? 'Add customer'
+                          : 'Update customer'
+                  }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── CUSTOMER DETAIL ── -->
+      <ng-container *ngIf="view === 'detail' && selectedCustomer">
+        <div class="topbar">
+          <h2>Customer profile</h2>
+          <button class="btn" (click)="setView('list')">← Back</button>
+          <button class="btn" (click)="openEdit(selectedCustomer!)">Edit</button>
+          <button class="btn red" (click)="deleteCustomer(selectedCustomer!)">Delete</button>
+        </div>
+        <div class="content">
+          <!-- Profile header -->
+          <div class="profile-card">
+            <div class="profile-avatar" [style.background]="avatarColor(selectedCustomer.Name)">
+              {{ initials(selectedCustomer.Name) }}
+            </div>
+            <div class="profile-info">
+              <h3>{{ selectedCustomer.Name }}</h3>
+              <span *ngIf="selectedCustomer.Phone">📞 {{ selectedCustomer.Phone }}</span>
+              <span *ngIf="selectedCustomer.Email">✉️ {{ selectedCustomer.Email }}</span>
+              <span *ngIf="selectedCustomer.Address">📍 {{ selectedCustomer.Address }}</span>
+            </div>
+            <div class="profile-stats">
+              <div class="pstat">
+                <span class="pstat-val">{{ selectedCustomer.TotalOrders }}</span>
+                <span class="pstat-label">Orders</span>
+              </div>
+              <div class="pstat">
+                <span class="pstat-val">{{ bd(selectedCustomer.TotalSpent) }}</span>
+                <span class="pstat-label">Total spent</span>
+              </div>
+              <div class="pstat">
+                <span class="pstat-val">{{ selectedCustomer.LoyaltyPoints }}</span>
+                <span class="pstat-label">Points</span>
+              </div>
+              <div class="pstat">
+                <span class="pstat-val">
+                  <span class="tier-pill" [ngClass]="tierClass(selectedCustomer.LoyaltyPoints)">
+                    {{ tierLabel(selectedCustomer.LoyaltyPoints) }}
+                  </span>
+                </span>
+                <span class="pstat-label">Tier</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <!-- Loyalty adjust -->
+            <div class="card">
+              <div class="card-head">
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#185FA5"
+                  stroke-width="2"
+                >
+                  <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                  />
+                </svg>
+                <h3>Adjust loyalty points</h3>
+              </div>
+              <div class="form-grid" style="padding: 14px 16px">
+                <div class="form-field full-width">
+                  <label
+                    >Current balance:
+                    <strong>{{ selectedCustomer.LoyaltyPoints }} pts</strong></label
+                  >
+                </div>
+                <div class="form-field">
+                  <label>Points to add / remove</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="loyaltyDelta"
+                    class="form-input"
+                    placeholder="e.g. 50 or -20"
+                  />
+                </div>
+                <div class="form-field">
+                  <label>Reason (optional)</label>
+                  <input
+                    [(ngModel)]="loyaltyNote"
+                    class="form-input"
+                    placeholder="Promo, correction…"
+                  />
+                </div>
+                <div class="form-field full-width form-actions">
+                  <button
+                    class="btn primary"
+                    (click)="saveLoyalty()"
+                    [disabled]="loyaltyDelta === 0 || loyaltySaving"
+                    [class.success]="loyaltySuccess"
+                  >
+                    {{ loyaltySaving ? 'Saving…' : loyaltySuccess ? '✓ Updated!' : 'Apply' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="card">
+              <div class="card-head">
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#185FA5"
+                  stroke-width="2"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+                <h3>Notes</h3>
+              </div>
+              <div style="padding: 16px; font-size: 13px; color: #374151; min-height: 80px">
+                {{ selectedCustomer.Notes || 'No notes for this customer.' }}
+              </div>
+              <div
+                style="
+                  padding: 8px 16px;
+                  border-top: 1px solid #e8edf3;
+                  font-size: 11px;
+                  color: #9ca3af;
+                "
+              >
+                Customer since {{ selectedCustomer.CreatedAt | date: 'dd MMM yyyy' }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Purchase history -->
+          <div class="card">
+            <div class="card-head">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#185FA5"
+                stroke-width="2"
+              >
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                <polyline points="17 6 23 6 23 12" />
+              </svg>
+              <h3>Purchase history</h3>
+            </div>
+            <div class="empty-state" *ngIf="!historyLoading && saleHistory.length === 0">
+              No purchases recorded yet
+            </div>
+            <div class="empty-state" *ngIf="historyLoading">Loading…</div>
+            <table class="table" *ngIf="!historyLoading && saleHistory.length > 0">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Items</th>
+                  <th>Subtotal</th>
+                  <th>Discount</th>
+                  <th>Total</th>
+                  <th>Payment</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let s of saleHistory">
+                  <td class="td-muted">{{ s.SaleDate | date: 'dd MMM yyyy HH:mm' }}</td>
+                  <td>{{ s.ItemCount }}</td>
+                  <td>{{ bd(s.Subtotal) }}</td>
+                  <td class="qty-neg" *ngIf="s.Discount > 0">-{{ bd(s.Discount) }}</td>
+                  <td *ngIf="s.Discount === 0" class="td-muted">—</td>
+                  <td class="td-spend">{{ bd(s.Total) }}</td>
+                  <td>
+                    <span class="pay-pill" [ngClass]="s.PayMethod">{{ s.PayMethod }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── LOYALTY TIERS ── -->
+      <ng-container *ngIf="view === 'loyalty'">
+        <div class="topbar"><h2>Loyalty tiers</h2></div>
+        <div class="content">
+          <div class="stats-grid three-col" style="margin-bottom: 16px">
+            <div class="stat-card tier-stat gold">
+              <div class="stat-icon si-amber">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                  />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Gold (1000+ pts)</span>
+                <span class="stat-val">{{ goldCount }}</span>
+                <span class="stat-sub">Top tier</span>
+              </div>
+            </div>
+            <div class="stat-card tier-stat silver">
+              <div class="stat-icon si-blue">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                  />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Silver (500–999 pts)</span>
+                <span class="stat-val">{{ silverCount }}</span>
+                <span class="stat-sub">Mid tier</span>
+              </div>
+            </div>
+            <div class="stat-card tier-stat bronze">
+              <div class="stat-icon si-red">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                  />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Bronze (100–499 pts)</span>
+                <span class="stat-val">{{ bronzeCount }}</span>
+                <span class="stat-sub">Entry tier</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>Loyalty leaderboard</h3></div>
+            <div class="empty-state" *ngIf="loyaltyCustomers.length === 0">
+              No loyalty members yet
+            </div>
+            <table class="table" *ngIf="loyaltyCustomers.length > 0">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Customer</th>
+                  <th>Phone</th>
+                  <th>Points</th>
+                  <th>Tier</th>
+                  <th>Total spent</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let c of loyaltyCustomers; let i = index">
+                  <td class="td-muted">{{ i + 1 }}</td>
+                  <td>
+                    <div class="cust-name-cell">
+                      <div class="avatar" [style.background]="avatarColor(c.Name)">
+                        {{ initials(c.Name) }}
+                      </div>
+                      <span class="td-name">{{ c.Name }}</span>
+                    </div>
+                  </td>
+                  <td class="td-muted">{{ c.Phone ?? '—' }}</td>
+                  <td>
+                    <strong>{{ c.LoyaltyPoints }}</strong>
+                  </td>
+                  <td>
+                    <span class="tier-pill" [ngClass]="tierClass(c.LoyaltyPoints)">{{
+                      tierLabel(c.LoyaltyPoints)
+                    }}</span>
+                  </td>
+                  <td class="td-spend">{{ bd(c.TotalSpent) }}</td>
+                  <td><button class="btn-sm" (click)="openDetail(c)">View</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+    </main>
+  </div>
+</div>

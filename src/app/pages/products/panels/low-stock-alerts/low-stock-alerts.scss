@@ -19,8 +19,8 @@
   font-size: 14px;
 }
 .al-card {
-  background: #0d1f3c;
-  border: 1px solid #3d2200;
+  background: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   border-radius: 10px;
   padding: 12px 14px;
   display: flex;
@@ -49,7 +49,7 @@
 .al-name {
   font-size: 13px;
   font-weight: 500;
-  color: #fff;
+  color: #0d1f3c;
   margin-bottom: 2px;
 }
 .al-meta {

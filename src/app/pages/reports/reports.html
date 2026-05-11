@@ -1,0 +1,872 @@
+<!-- reports.html -->
+<div class="rpt-page" [style.background-image]="'url(bg.png)'">
+  <app-header pageTitle="Reports" />
+
+  <div class="rpt-body">
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="sidebar">
+      <nav>
+        <div class="nav-section">Sales</div>
+        <div class="nav-item" [class.active]="view === 'daily'" (click)="setView('daily')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          Daily sales
+        </div>
+        <div class="nav-item" [class.active]="view === 'monthly'" (click)="setView('monthly')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+            <polyline points="17 6 23 6 23 12" />
+          </svg>
+          Monthly / yearly
+        </div>
+
+        <div class="nav-section">Products</div>
+        <div class="nav-item" [class.active]="view === 'products'" (click)="setView('products')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+          Product sales
+        </div>
+        <div class="nav-item" [class.active]="view === 'category'" (click)="setView('category')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+          </svg>
+          Category report
+        </div>
+
+        <div class="nav-section">Finance</div>
+        <div class="nav-item" [class.active]="view === 'vat'" (click)="setView('vat')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+            <path d="M2 17l10 5 10-5" />
+            <path d="M2 12l10 5 10-5" />
+          </svg>
+          VAT report
+        </div>
+        <div class="nav-item" [class.active]="view === 'profit'" (click)="setView('profit')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="1" x2="12" y2="23" />
+            <path d="M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6" />
+          </svg>
+          Profit report
+        </div>
+        <div class="nav-item" [class.active]="view === 'payment'" (click)="setView('payment')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="1" y="4" width="22" height="16" rx="2" />
+            <line x1="1" y1="10" x2="23" y2="10" />
+          </svg>
+          Payment report
+        </div>
+
+        <div class="nav-section">Staff</div>
+        <div class="nav-item" [class.active]="view === 'users'" (click)="setView('users')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 00-3-3.87" />
+            <path d="M16 3.13a4 4 0 010 7.75" />
+          </svg>
+          User-wise sales
+        </div>
+      </nav>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <main class="rpt-main">
+      <!-- ── TOPBAR ── -->
+      <div class="topbar">
+        <h2>
+          {{
+            {
+              daily: 'Daily sales report',
+              monthly: 'Monthly / yearly report',
+              products: 'Product sales report',
+              category: 'Category report',
+              vat: 'VAT report',
+              profit: 'Profit report',
+              payment: 'Payment report',
+              users: 'User-wise sales',
+            }[view]
+          }}
+        </h2>
+
+        <div class="date-tabs">
+          <button class="dt" [class.on]="dateRange === 'today'" (click)="setDateRange('today')">
+            Today
+          </button>
+          <button class="dt" [class.on]="dateRange === 'week'" (click)="setDateRange('week')">
+            Week
+          </button>
+          <button class="dt" [class.on]="dateRange === 'month'" (click)="setDateRange('month')">
+            Month
+          </button>
+          <button class="dt" [class.on]="dateRange === 'year'" (click)="setDateRange('year')">
+            Year
+          </button>
+        </div>
+
+        <div class="custom-range" *ngIf="dateRange === 'custom'">
+          <input type="date" [(ngModel)]="dateFrom" class="date-input" />
+          <span>—</span>
+          <input type="date" [(ngModel)]="dateTo" class="date-input" />
+        </div>
+
+        <button class="export-btn" (click)="exportCsv()">
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Export CSV
+        </button>
+      </div>
+
+      <!-- ══ DAILY ══ -->
+      <div class="content" *ngIf="view === 'daily'">
+        <div class="kpis">
+          <div class="kpi">
+            <div class="kpi-lbl">Total sales</div>
+            <div class="kpi-val">{{ bd(dailyKpis.sales) }}</div>
+            <div class="kpi-trend up">↑ 12% vs yesterday</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-lbl">Transactions</div>
+            <div class="kpi-val">{{ dailyKpis.transactions || 87 }}</div>
+            <div class="kpi-trend up">↑ 5 more</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-lbl">Avg basket</div>
+            <div class="kpi-val">{{ bd(dailyKpis.avgBasket) }}</div>
+            <div class="kpi-trend neu">— same as avg</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-lbl">Items sold</div>
+            <div class="kpi-val">{{ dailyKpis.itemsSold || 342 }}</div>
+            <div class="kpi-trend dn">↓ 3% vs yesterday</div>
+          </div>
+        </div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="ch">
+              <h3>Sales by hour</h3>
+              <span>Today</span>
+            </div>
+            <div class="cp">
+              <div style="position: relative; height: 180px">
+                <canvas id="c-hourly" role="img" aria-label="Hourly sales bar chart"
+                  >Sales peak at midday.</canvas
+                >
+              </div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="ch">
+              <h3>Payment methods</h3>
+              <span>Today</span>
+            </div>
+            <div class="cp">
+              <div style="position: relative; height: 140px">
+                <canvas id="c-pay-daily" role="img" aria-label="Doughnut chart payment methods"
+                  >Cash 55%, Card 35%, Credit 10%.</canvas
+                >
+              </div>
+            </div>
+            <div class="legend">
+              <span><span class="ldot" style="background: #1565c0"></span>Cash 55%</span>
+              <span><span class="ldot" style="background: #42a5f5"></span>Card 35%</span>
+              <span><span class="ldot" style="background: #bbdefb"></span>Credit 10%</span>
+            </div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="ch"><h3>Recent transactions</h3></div>
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Invoice</th>
+                <th>Items</th>
+                <th>Payment</th>
+                <th>Total</th>
+                <th>Cashier</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngIf="recentTransactions.length > 0">
+                <tr *ngFor="let t of recentTransactions">
+                  <td>{{ t.CreatedAt | date: 'HH:mm' }}</td>
+                  <td>#{{ t.Id }}</td>
+                  <td>{{ t.ItemCount }}</td>
+                  <td>
+                    <span
+                      class="pill"
+                      [ngClass]="
+                        t.PayMethod === 'cash'
+                          ? 'p-blue'
+                          : t.PayMethod === 'card'
+                            ? 'p-cyan'
+                            : 'p-indigo'
+                      "
+                      >{{ t.PayMethod }}</span
+                    >
+                  </td>
+                  <td>{{ bd(t.Total) }}</td>
+                  <td>{{ t.CashierName || 'System' }}</td>
+                </tr>
+              </ng-container>
+              <ng-container *ngIf="recentTransactions.length === 0">
+                <tr>
+                  <td>14:32</td>
+                  <td>#1082</td>
+                  <td>5</td>
+                  <td><span class="pill p-blue">Cash</span></td>
+                  <td>BD 23.500</td>
+                  <td>Ahmed</td>
+                </tr>
+                <tr>
+                  <td>14:15</td>
+                  <td>#1081</td>
+                  <td>3</td>
+                  <td><span class="pill p-cyan">Card</span></td>
+                  <td>BD 12.000</td>
+                  <td>Sara</td>
+                </tr>
+                <tr>
+                  <td>13:58</td>
+                  <td>#1080</td>
+                  <td>8</td>
+                  <td><span class="pill p-blue">Cash</span></td>
+                  <td>BD 41.750</td>
+                  <td>Ahmed</td>
+                </tr>
+                <tr>
+                  <td>13:40</td>
+                  <td>#1079</td>
+                  <td>2</td>
+                  <td><span class="pill p-indigo">Credit</span></td>
+                  <td>BD 8.200</td>
+                  <td>Khalid</td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ MONTHLY ══ -->
+      <div class="content" *ngIf="view === 'monthly'">
+        <div class="kpis">
+          <div class="kpi">
+            <div class="kpi-lbl">YTD revenue</div>
+            <div class="kpi-val">BD 48,240</div>
+            <div class="kpi-trend up">↑ 18% vs last year</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-lbl">Best month</div>
+            <div class="kpi-val">March</div>
+            <div class="kpi-trend neu">BD 12,840</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-lbl">Total orders</div>
+            <div class="kpi-val">3,124</div>
+            <div class="kpi-trend up">↑ 8%</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-lbl">Avg monthly</div>
+            <div class="kpi-val">BD 12,060</div>
+            <div class="kpi-trend neu">4 months</div>
+          </div>
+        </div>
+        <div class="chart-card full-w">
+          <div class="ch">
+            <h3>Monthly revenue — 2026</h3>
+            <span>Jan–Apr actuals, May–Dec projected</span>
+          </div>
+          <div class="cp">
+            <div style="position: relative; height: 200px">
+              <canvas id="c-monthly" role="img" aria-label="Monthly revenue bar chart"
+                >Jan–Apr shown with actuals.</canvas
+              >
+            </div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="ch"><h3>Month breakdown</h3></div>
+          <table>
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Revenue</th>
+                <th>Orders</th>
+                <th>Avg order</th>
+                <th>Growth</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngIf="monthlyRows.length > 0">
+                <tr *ngFor="let r of monthlyRows">
+                  <td>{{ r.Month }}</td>
+                  <td>{{ bd(r.Revenue) }}</td>
+                  <td>{{ r.Orders }}</td>
+                  <td>{{ bd(r.AvgOrder) }}</td>
+                  <td>
+                    <span class="pill" [ngClass]="r.Growth > 0 ? 'p-blue' : 'p-red'"
+                      >{{ r.Growth > 0 ? '+' : '' }}{{ r.Growth }}%</span
+                    >
+                  </td>
+                </tr>
+              </ng-container>
+              <ng-container *ngIf="monthlyRows.length === 0">
+                <tr>
+                  <td>April 2026</td>
+                  <td>BD 10,284.000</td>
+                  <td>821</td>
+                  <td>BD 12.520</td>
+                  <td><span class="pill p-blue">+14%</span></td>
+                </tr>
+                <tr>
+                  <td>March 2026</td>
+                  <td>BD 12,840.000</td>
+                  <td>942</td>
+                  <td>BD 13.630</td>
+                  <td><span class="pill p-blue">+22%</span></td>
+                </tr>
+                <tr>
+                  <td>February 2026</td>
+                  <td>BD 11,200.000</td>
+                  <td>798</td>
+                  <td>BD 14.040</td>
+                  <td><span class="pill p-blue">+9%</span></td>
+                </tr>
+                <tr>
+                  <td>January 2026</td>
+                  <td>BD 13,916.000</td>
+                  <td>563</td>
+                  <td>BD 11.210</td>
+                  <td><span class="pill p-cyan">+3%</span></td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ PRODUCTS ══ -->
+      <div class="content" *ngIf="view === 'products'">
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="ch"><h3>Top products by revenue</h3></div>
+            <div class="cp">
+              <div style="position: relative; height: 240px">
+                <canvas id="c-products" role="img" aria-label="Horizontal bar chart top products"
+                  >Lamb Chops leads.</canvas
+                >
+              </div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="ch"><h3>Revenue by category</h3></div>
+            <div class="cp">
+              <div style="position: relative; height: 175px">
+                <canvas id="c-cat-pie" role="img" aria-label="Doughnut chart category revenue"
+                  >Meat 28%.</canvas
+                >
+              </div>
+            </div>
+            <div class="legend">
+              <span><span class="ldot" style="background: #1565c0"></span>Meat 28%</span>
+              <span><span class="ldot" style="background: #1e88e5"></span>Dairy 22%</span>
+              <span><span class="ldot" style="background: #42a5f5"></span>Grains 18%</span>
+              <span><span class="ldot" style="background: #26c6da"></span>Beverages 16%</span>
+              <span><span class="ldot" style="background: #00acc1"></span>Other 16%</span>
+            </div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="ch"><h3>Product performance</h3></div>
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Qty sold</th>
+                <th>Revenue</th>
+                <th>% of total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngIf="productRows.length > 0">
+                <tr *ngFor="let p of productRows">
+                  <td class="td-bold">{{ p.Name }}</td>
+                  <td>{{ p.CategoryName }}</td>
+                  <td>{{ p.QtySold }}</td>
+                  <td>{{ bd(p.Revenue) }}</td>
+                  <td>
+                    <div class="bar-cell">
+                      <div class="bar-bg"><div class="bar-fill" [style.width.%]="p.Pct"></div></div>
+                      {{ p.Pct }}%
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
+              <ng-container *ngIf="productRows.length === 0">
+                <tr>
+                  <td class="td-bold">Lamb Chops 1kg</td>
+                  <td>Meat</td>
+                  <td>148</td>
+                  <td>BD 858.400</td>
+                  <td>
+                    <div class="bar-cell">
+                      <div class="bar-bg"><div class="bar-fill" style="width: 72%"></div></div>
+                      18%
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="td-bold">Almarai Milk 1L</td>
+                  <td>Dairy</td>
+                  <td>312</td>
+                  <td>BD 561.600</td>
+                  <td>
+                    <div class="bar-cell">
+                      <div class="bar-bg"><div class="bar-fill" style="width: 52%"></div></div>
+                      12%
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="td-bold">Basmati Rice 5kg</td>
+                  <td>Grains</td>
+                  <td>98</td>
+                  <td>BD 245.000</td>
+                  <td>
+                    <div class="bar-cell">
+                      <div class="bar-bg"><div class="bar-fill" style="width: 24%"></div></div>
+                      5%
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="td-bold">Mineral Water</td>
+                  <td>Beverages</td>
+                  <td>540</td>
+                  <td>BD 108.000</td>
+                  <td>
+                    <div class="bar-cell">
+                      <div class="bar-bg"><div class="bar-fill" style="width: 10%"></div></div>
+                      2%
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ CATEGORY ══ -->
+      <div class="content" *ngIf="view === 'category'">
+        <div class="kpis" style="grid-template-columns: repeat(3, 1fr)">
+          <div class="kpi">
+            <div class="kpi-lbl">Top category</div>
+            <div class="kpi-val" style="font-size: 20px">Meat</div>
+            <div class="kpi-trend up">BD 2,840 this month</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-lbl">Active categories</div>
+            <div class="kpi-val">11</div>
+            <div class="kpi-trend neu">This period</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-lbl">Fastest growth</div>
+            <div class="kpi-val" style="font-size: 20px">Bakery</div>
+            <div class="kpi-trend up">↑ 34% vs last month</div>
+          </div>
+        </div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="ch"><h3>Revenue by category</h3></div>
+            <div class="cp">
+              <div style="position: relative; height: 210px">
+                <canvas id="c-catbar" role="img" aria-label="Category revenue bar chart"
+                  >Meat highest.</canvas
+                >
+              </div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="ch"><h3>Share of total sales</h3></div>
+            <div class="cp">
+              <div style="position: relative; height: 170px">
+                <canvas id="c-catdough" role="img" aria-label="Doughnut chart category share"
+                  >Meat 28%, Dairy 22%.</canvas
+                >
+              </div>
+            </div>
+            <div class="legend">
+              <span><span class="ldot" style="background: #1565c0"></span>Meat 28%</span>
+              <span><span class="ldot" style="background: #1e88e5"></span>Dairy 22%</span>
+              <span><span class="ldot" style="background: #42a5f5"></span>Grains 18%</span>
+              <span><span class="ldot" style="background: #26c6da"></span>Beverages 16%</span>
+              <span><span class="ldot" style="background: #00acc1"></span>Bakery 9%</span>
+              <span><span class="ldot" style="background: #3949ab"></span>Other 7%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ VAT ══ -->
+      <div class="content" *ngIf="view === 'vat'">
+        <div class="kpis">
+          <div class="kpi">
+            <div class="kpi-lbl">Net sales</div>
+            <div class="kpi-val">{{ bd(vatKpis.netSales) || 'BD 10,284.000' }}</div>
+            <div class="kpi-trend neu">Before VAT</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-lbl">VAT collected</div>
+            <div class="kpi-val">{{ bd(vatKpis.vatCollected) || 'BD 1,028.000' }}</div>
+            <div class="kpi-trend neu">10% rate</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-lbl">Gross total</div>
+            <div class="kpi-val">{{ bd(vatKpis.gross) || 'BD 11,312.000' }}</div>
+            <div class="kpi-trend neu">Incl. VAT</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-lbl">VAT %</div>
+            <div class="kpi-val">9.1%</div>
+            <div class="kpi-trend neu">Of gross revenue</div>
+          </div>
+        </div>
+        <div class="chart-card full-w">
+          <div class="ch"><h3>VAT vs net sales by month</h3></div>
+          <div class="cp">
+            <div style="position: relative; height: 200px">
+              <canvas id="c-vat" role="img" aria-label="Stacked bar chart VAT vs net sales"
+                >VAT ~10% of net each month.</canvas
+              >
+            </div>
+          </div>
+          <div class="legend">
+            <span><span class="ldot" style="background: #1e88e5"></span>Net sales</span>
+            <span><span class="ldot" style="background: #90caf9"></span>VAT collected</span>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="ch"><h3>VAT breakdown by category</h3></div>
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Net sales</th>
+                <th>VAT rate</th>
+                <th>VAT amount</th>
+                <th>Gross</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngIf="vatRows.length > 0">
+                <tr *ngFor="let r of vatRows">
+                  <td>{{ r.Category }}</td>
+                  <td>{{ bd(r.NetSales) }}</td>
+                  <td>{{ r.VatRate }}%</td>
+                  <td>{{ bd(r.VatAmount) }}</td>
+                  <td>{{ bd(r.Gross) }}</td>
+                </tr>
+              </ng-container>
+              <ng-container *ngIf="vatRows.length === 0">
+                <tr>
+                  <td>Meat</td>
+                  <td>BD 2,840.000</td>
+                  <td>10%</td>
+                  <td>BD 284.000</td>
+                  <td>BD 3,124.000</td>
+                </tr>
+                <tr>
+                  <td>Dairy</td>
+                  <td>BD 2,264.000</td>
+                  <td>10%</td>
+                  <td>BD 226.400</td>
+                  <td>BD 2,490.400</td>
+                </tr>
+                <tr>
+                  <td>Beverages</td>
+                  <td>BD 1,648.000</td>
+                  <td>10%</td>
+                  <td>BD 164.800</td>
+                  <td>BD 1,812.800</td>
+                </tr>
+                <tr>
+                  <td>Grains</td>
+                  <td>BD 1,852.000</td>
+                  <td>0%</td>
+                  <td>BD 0.000</td>
+                  <td>BD 1,852.000</td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ PROFIT ══ -->
+      <div class="content" *ngIf="view === 'profit'">
+        <div class="kpis">
+          <div class="kpi">
+            <div class="kpi-lbl">Revenue</div>
+            <div class="kpi-val">{{ bd(profitKpis.revenue) || 'BD 10,284.000' }}</div>
+            <div class="kpi-trend up">↑ 14%</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-lbl">Cost of goods</div>
+            <div class="kpi-val">{{ bd(profitKpis.cogs) || 'BD 6,420.000' }}</div>
+            <div class="kpi-trend neu">62.4% of revenue</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-lbl">Gross profit</div>
+            <div class="kpi-val">{{ bd(profitKpis.grossProfit) || 'BD 3,864.000' }}</div>
+            <div class="kpi-trend up">37.6% margin</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-lbl">Net profit</div>
+            <div class="kpi-val">{{ bd(profitKpis.netProfit) || 'BD 2,840.000' }}</div>
+            <div class="kpi-trend up">27.6% margin</div>
+          </div>
+        </div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="ch"><h3>Revenue vs Cost vs Profit</h3></div>
+            <div class="cp">
+              <div style="position: relative; height: 210px">
+                <canvas id="c-profit" role="img" aria-label="Grouped bar chart revenue cost profit"
+                  >Profit margin 37.6%.</canvas
+                >
+              </div>
+            </div>
+            <div class="legend">
+              <span><span class="ldot" style="background: #1e88e5"></span>Revenue</span>
+              <span><span class="ldot" style="background: #90caf9"></span>COGS</span>
+              <span><span class="ldot" style="background: #26c6da"></span>Profit</span>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="ch"><h3>Gross profit margin %</h3></div>
+            <div class="cp">
+              <div style="position: relative; height: 175px">
+                <canvas id="c-margin" role="img" aria-label="Line chart profit margin trend"
+                  >Margin stable at 37.6%.</canvas
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PAYMENT ══ -->
+      <div class="content" *ngIf="view === 'payment'">
+        <div class="kpis" style="grid-template-columns: repeat(3, 1fr)">
+          <div class="kpi">
+            <div class="kpi-lbl">Cash</div>
+            <div class="kpi-val">BD 5,656.000</div>
+            <div class="kpi-trend neu">55% of sales</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-lbl">Card</div>
+            <div class="kpi-val">BD 3,600.000</div>
+            <div class="kpi-trend neu">35% of sales</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-lbl">Credit</div>
+            <div class="kpi-val">BD 1,028.000</div>
+            <div class="kpi-trend neu">10% of sales</div>
+          </div>
+        </div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="ch"><h3>Payment method trend</h3></div>
+            <div class="cp">
+              <div style="position: relative; height: 210px">
+                <canvas
+                  id="c-paytrend"
+                  role="img"
+                  aria-label="Stacked bar chart payment methods over months"
+                  >Cash dominates.</canvas
+                >
+              </div>
+            </div>
+            <div class="legend">
+              <span><span class="ldot" style="background: #1565c0"></span>Cash</span>
+              <span><span class="ldot" style="background: #42a5f5"></span>Card</span>
+              <span><span class="ldot" style="background: #bbdefb"></span>Credit</span>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="ch"><h3>Payment split</h3></div>
+            <div class="cp">
+              <div style="position: relative; height: 175px">
+                <canvas id="c-paysplit" role="img" aria-label="Doughnut chart payment split"
+                  >Cash 55%, Card 35%, Credit 10%.</canvas
+                >
+              </div>
+            </div>
+            <div class="legend">
+              <span><span class="ldot" style="background: #1565c0"></span>Cash 55%</span>
+              <span><span class="ldot" style="background: #42a5f5"></span>Card 35%</span>
+              <span><span class="ldot" style="background: #bbdefb"></span>Credit 10%</span>
+            </div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="ch"><h3>Daily payment breakdown</h3></div>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Cash</th>
+                <th>Card</th>
+                <th>Credit</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of paymentRows">
+                <td>{{ r.Date }}</td>
+                <td>{{ bd(r.Cash) }}</td>
+                <td>{{ bd(r.Card) }}</td>
+                <td>{{ bd(r.Credit) }}</td>
+                <td>{{ bd(r.Total) }}</td>
+              </tr>
+              <ng-container *ngIf="paymentRows.length === 0">
+                <tr>
+                  <td>26 Apr</td>
+                  <td>BD 620.000</td>
+                  <td>BD 380.000</td>
+                  <td>BD 100.000</td>
+                  <td>BD 1,100.000</td>
+                </tr>
+                <tr>
+                  <td>25 Apr</td>
+                  <td>BD 580.000</td>
+                  <td>BD 420.000</td>
+                  <td>BD 84.000</td>
+                  <td>BD 1,084.000</td>
+                </tr>
+                <tr>
+                  <td>24 Apr</td>
+                  <td>BD 700.000</td>
+                  <td>BD 310.000</td>
+                  <td>BD 94.000</td>
+                  <td>BD 1,104.000</td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ USERS ══ -->
+      <div class="content" *ngIf="view === 'users'">
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="ch"><h3>Revenue by cashier</h3></div>
+            <div class="cp">
+              <div style="position: relative; height: 210px">
+                <canvas id="c-users" role="img" aria-label="Bar chart revenue by cashier"
+                  >Ahmed leads in revenue.</canvas
+                >
+              </div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="ch"><h3>Orders by cashier</h3></div>
+            <div class="cp">
+              <div style="position: relative; height: 175px">
+                <canvas id="c-userpie" role="img" aria-label="Doughnut chart orders by cashier"
+                  >Ahmed 42%, Sara 31%, Khalid 27%.</canvas
+                >
+              </div>
+            </div>
+            <div class="legend">
+              <span><span class="ldot" style="background: #1565c0"></span>Ahmed 42%</span>
+              <span><span class="ldot" style="background: #1e88e5"></span>Sara 31%</span>
+              <span><span class="ldot" style="background: #26c6da"></span>Khalid 27%</span>
+            </div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="ch"><h3>Cashier performance</h3></div>
+          <table>
+            <thead>
+              <tr>
+                <th>Cashier</th>
+                <th>Orders</th>
+                <th>Revenue</th>
+                <th>Avg order</th>
+                <th>Cash %</th>
+                <th>Card %</th>
+                <th>Performance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngIf="userRows.length > 0">
+                <tr *ngFor="let u of userRows">
+                  <td class="td-bold">{{ u.Name }}</td>
+                  <td>{{ u.OrderCount }}</td>
+                  <td>{{ bd(u.Revenue) }}</td>
+                  <td>{{ bd(u.AvgOrder) }}</td>
+                  <td>{{ u.CashPct }}%</td>
+                  <td>{{ u.CardPct }}%</td>
+                  <td><span class="pill p-blue">Active</span></td>
+                </tr>
+              </ng-container>
+              <ng-container *ngIf="userRows.length === 0">
+                <tr>
+                  <td class="td-bold">Ahmed</td>
+                  <td>37</td>
+                  <td>BD 541.200</td>
+                  <td>BD 14.630</td>
+                  <td>65%</td>
+                  <td>35%</td>
+                  <td><span class="pill p-blue">Top</span></td>
+                </tr>
+                <tr>
+                  <td class="td-bold">Sara</td>
+                  <td>27</td>
+                  <td>BD 378.900</td>
+                  <td>BD 14.030</td>
+                  <td>48%</td>
+                  <td>52%</td>
+                  <td><span class="pill p-cyan">Good</span></td>
+                </tr>
+                <tr>
+                  <td class="td-bold">Khalid</td>
+                  <td>23</td>
+                  <td>BD 294.400</td>
+                  <td>BD 12.800</td>
+                  <td>71%</td>
+                  <td>29%</td>
+                  <td><span class="pill p-light">Average</span></td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

@@ -1,0 +1,596 @@
+<!-- pos.html — SuperMart style, touch-friendly -->
+<div class="pos-root">
+  <!-- ══ TOP BAR ══ -->
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="brand-logo">
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#22c55e"
+          stroke-width="2.5"
+        >
+          <path
+            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 2.3c-.6.6-.2 1.7.7 1.7H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+          />
+        </svg>
+      </div>
+      <span class="brand-name">{{ companyName || 'SuperMart' }}</span>
+    </div>
+
+    <div class="topbar-title">POS</div>
+
+    <div class="topbar-right">
+      <span class="topbar-datetime">{{ currentTime | date: 'dd MMM yyyy | HH:mm' }}</span>
+      <div class="topbar-cashier">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+        <span>{{ cashierName || 'Cashier' }}</span>
+      </div>
+      <button class="topbar-back" (click)="goBack()">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        Back
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ BODY ══ -->
+  <div class="pos-body">
+    <!-- ── LEFT: CART PANEL ── -->
+    <div class="pos-left">
+      <!-- Invoice header -->
+      <div class="invoice-header">
+        <div class="invoice-customer">
+          <div class="inv-cust-row">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#2563eb"
+              stroke-width="2.2"
+            >
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            <input
+              class="cust-search"
+              [(ngModel)]="customerSearch"
+              (ngModelChange)="onCustomerSearch()"
+              (keydown.escape)="clearCustomer()"
+              placeholder="Search customer by mobile…"
+            />
+            <button class="cust-x" *ngIf="selectedCustomerId" (click)="clearCustomer()">✕</button>
+          </div>
+          <!-- Dropdown -->
+          <div class="cust-drop" *ngIf="customerResults.length > 0 && !selectedCustomerId">
+            <div class="cust-opt" *ngFor="let c of customerResults" (click)="selectCustomer(c)">
+              <span class="co-name">{{ c.Name }}</span>
+              <span class="co-phone">{{ c.Phone }}</span>
+            </div>
+          </div>
+          <div class="cust-badge" *ngIf="selectedCustomerId">
+            ✓ {{ selectedCustomerName }}
+            <span *ngIf="selectedCustomerPhone"> · {{ selectedCustomerPhone }}</span>
+          </div>
+        </div>
+        <div class="invoice-no-row">
+          <span class="inv-label">Invoice #</span>
+          <span class="inv-number">{{ invoiceNumber }}</span>
+        </div>
+      </div>
+
+      <!-- Cart table -->
+      <div class="cart-scroll">
+        <div class="cart-empty" *ngIf="cart.length === 0">
+          <svg
+            width="52"
+            height="52"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#d1d5db"
+            stroke-width="1.2"
+          >
+            <path
+              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 2.3c-.6.6-.2 1.7.7 1.7H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+            />
+          </svg>
+          <p>Cart is empty</p>
+          <span>Tap a product to add</span>
+        </div>
+
+        <table class="cart-tbl" *ngIf="cart.length > 0">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th class="tc">Qty</th>
+              <th class="tr">Price</th>
+              <th class="tr">Total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of cart; let i = index" class="cart-row">
+              <td class="td-item">
+                <div class="ci-name">{{ item.name }}</div>
+                <div class="ci-disc" *ngIf="item.discount > 0">{{ item.discount }}% off</div>
+              </td>
+              <td class="td-qty tc">
+                <div class="qc">
+                  <button class="qb" (click)="changeQty(i, -1)">−</button>
+                  <span class="qv">{{ item.qty }}</span>
+                  <button class="qb" (click)="changeQty(i, 1)">+</button>
+                </div>
+              </td>
+              <td class="td-price tr">BD {{ item.price | number: '1.3-3' }}</td>
+              <td class="td-total tr">BD {{ item.price * item.qty | number: '1.3-3' }}</td>
+              <td class="td-del">
+                <button class="del-btn" (click)="removeItem(i)">✕</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Totals -->
+      <div class="cart-totals">
+        <div class="tot-line">
+          <span>Subtotal</span>
+          <span>BD {{ subtotal | number: '1.3-3' }}</span>
+        </div>
+        <div class="tot-line disc" *ngIf="discountApplied">
+          <span>Discount ({{ globalDiscount }}%)</span>
+          <span>−BD {{ discountAmount | number: '1.3-3' }}</span>
+        </div>
+        <div class="tot-line vat" *ngIf="vatAmount > 0">
+          <span>VAT</span>
+          <span>BD {{ vatAmount | number: '1.3-3' }}</span>
+        </div>
+        <div class="tot-grand">
+          <span>Total</span>
+          <span class="grand-val">BD {{ grandTotal | number: '1.3-3' }}</span>
+        </div>
+      </div>
+
+      <!-- Hold + Clear -->
+      <div class="cart-actions">
+        <button class="ca-btn hold" (click)="holdOrder()" [disabled]="!cart.length">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <rect x="6" y="4" width="4" height="16" />
+            <rect x="14" y="4" width="4" height="16" />
+          </svg>
+          Hold
+          <span class="held-badge" *ngIf="heldOrders.length">{{ heldOrders.length }}</span>
+        </button>
+        <button class="ca-btn clear" (click)="clearCart()" [disabled]="!cart.length">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+            <path d="M10 11v6M14 11v6" />
+          </svg>
+          Clear Cart
+        </button>
+      </div>
+
+      <!-- Pay button -->
+      <button
+        class="pay-btn"
+        [class.success]="saleComplete"
+        [disabled]="!cart.length || loading || (payMethod === 'credit' && !selectedCustomerId)"
+        (click)="completeSale()"
+      >
+        <span class="pay-label">{{
+          loading ? 'Processing…' : saleComplete ? '✓ Complete!' : 'Pay'
+        }}</span>
+        <span class="pay-amount">BD {{ grandTotal | number: '1.3-3' }}</span>
+      </button>
+    </div>
+
+    <!-- ── RIGHT: PRODUCT PANEL ── -->
+    <div class="pos-right">
+      <!-- Search bar -->
+      <div class="search-bar">
+        <div class="search-input-wrap">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#9ca3af"
+            stroke-width="2.2"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            #barcodeInput
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="filterProducts()"
+            (keydown)="onBarcodeEnter($event)"
+            placeholder="Search products by name or barcode"
+          />
+          <button
+            class="clear-search"
+            *ngIf="searchQuery"
+            (click)="searchQuery = ''; filterProducts()"
+          >
+            ✕
+          </button>
+        </div>
+        <button class="scan-btn" (click)="addByBarcode()">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="4" y1="6" x2="4" y2="18" />
+            <line x1="8" y1="6" x2="8" y2="18" />
+            <line x1="12" y1="6" x2="12" y2="18" />
+            <line x1="16" y1="6" x2="16" y2="18" />
+            <line x1="20" y1="6" x2="20" y2="18" />
+          </svg>
+          Scan Barcode
+        </button>
+      </div>
+
+      <!-- Categories -->
+      <div class="cats-bar">
+        <button
+          class="cat-chip"
+          *ngFor="let cat of categories"
+          [class.active]="cat === activeCategory"
+          (click)="setCategory(cat)"
+        >
+          <span class="cat-icon">{{ getCatIcon(cat) }}</span>
+          <span>{{ cat }}</span>
+        </button>
+      </div>
+
+      <!-- Product grid -->
+      <div class="grid-area">
+        <div class="product-grid">
+          <button
+            class="pcard"
+            *ngFor="let p of filteredProducts"
+            [class.out]="p.StockQty <= 0"
+            (click)="addToCart(p)"
+          >
+            <div class="pcard-img">
+              <span class="pcard-emoji">{{ getProductEmoji(p) }}</span>
+              <div class="out-pill" *ngIf="p.StockQty <= 0">Out</div>
+              <div class="low-pill" *ngIf="p.StockQty > 0 && p.StockQty <= 5">Low</div>
+            </div>
+            <div class="pcard-name">{{ p.Name }}</div>
+            <div class="pcard-price">BD {{ p.Price | number: '1.3-3' }}</div>
+          </button>
+
+          <div class="no-products" *ngIf="filteredProducts.length === 0">
+            <svg
+              width="36"
+              height="36"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#d1d5db"
+              stroke-width="1.5"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <p>No products found</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action row: Discount / Promo / Refund / More -->
+      <div class="action-row">
+        <button class="ar-btn" (click)="showDiscountPanel = !showDiscountPanel">
+          <svg
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#16a34a"
+            stroke-width="2"
+          >
+            <path
+              d="M7 7h.01M7 3h5a2 2 0 011.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"
+            />
+          </svg>
+          Discount
+        </button>
+        <button class="ar-btn" (click)="showPromoPanel = !showPromoPanel">
+          <svg
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#7c3aed"
+            stroke-width="2"
+          >
+            <path d="M20 12v10H4V12" />
+            <path d="M22 7H2v5h20V7z" />
+            <path d="M12 22V7" />
+            <path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z" />
+            <path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z" />
+          </svg>
+          Promo Code
+        </button>
+        <button class="ar-btn" (click)="showHeldPanel = !showHeldPanel">
+          <svg
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#d97706"
+            stroke-width="2"
+          >
+            <polyline points="1 4 1 10 7 10" />
+            <path d="M3.51 15a9 9 0 1 0 .49-4.95" />
+          </svg>
+          Resume
+          <span class="ar-badge" *ngIf="heldOrders.length">{{ heldOrders.length }}</span>
+        </button>
+        <button class="ar-btn" (click)="showCalculator = true">
+          <svg
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#6b7280"
+            stroke-width="2"
+          >
+            <rect x="4" y="2" width="16" height="20" rx="2" />
+            <line x1="8" y1="6" x2="16" y2="6" />
+            <line x1="8" y1="10" x2="10" y2="10" />
+            <line x1="14" y1="10" x2="16" y2="10" />
+            <line x1="8" y1="14" x2="10" y2="14" />
+            <line x1="14" y1="14" x2="16" y2="14" />
+            <line x1="8" y1="18" x2="10" y2="18" />
+            <line x1="14" y1="18" x2="16" y2="18" />
+          </svg>
+          Calculator
+        </button>
+      </div>
+
+      <!-- Discount inline panel -->
+      <div class="inline-panel" *ngIf="showDiscountPanel">
+        <div class="ip-row">
+          <span class="ip-label">Discount %</span>
+          <input
+            class="ip-input"
+            type="number"
+            [(ngModel)]="discountInput"
+            min="0"
+            max="100"
+            placeholder="0"
+          />
+          <button class="ip-apply green" (click)="applyDiscountDirect()">Apply</button>
+          <button class="ip-apply red" *ngIf="discountApplied" (click)="removeDiscount()">
+            Remove
+          </button>
+          <button class="ip-close" (click)="showDiscountPanel = false">✕</button>
+        </div>
+      </div>
+
+      <!-- Promo inline panel -->
+      <div class="inline-panel" *ngIf="showPromoPanel">
+        <div class="ip-row">
+          <span class="ip-label">Promo Code</span>
+          <input
+            class="ip-input"
+            [(ngModel)]="globalDiscountCode"
+            placeholder="Enter code…"
+            (keydown.enter)="applyDiscount()"
+          />
+          <button class="ip-apply green" (click)="applyDiscount()">Apply</button>
+          <button class="ip-close" (click)="showPromoPanel = false">✕</button>
+        </div>
+      </div>
+
+      <!-- Payment methods row -->
+      <div class="pay-row">
+        <button class="pm-btn" [class.active]="payMethod === 'cash'" (click)="setPayMethod('cash')">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            [attr.stroke]="payMethod === 'cash' ? '#16a34a' : '#6b7280'"
+            stroke-width="2"
+          >
+            <rect x="2" y="7" width="20" height="14" rx="2" />
+            <path d="M16 3H8L6 7h12z" />
+          </svg>
+          Cash
+        </button>
+        <button class="pm-btn" [class.active]="payMethod === 'card'" (click)="setPayMethod('card')">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            [attr.stroke]="payMethod === 'card' ? '#2563eb' : '#6b7280'"
+            stroke-width="2"
+          >
+            <rect x="1" y="4" width="22" height="16" rx="2" />
+            <line x1="1" y1="10" x2="23" y2="10" />
+          </svg>
+          Card
+        </button>
+        <button
+          class="pm-btn"
+          [class.active]="payMethod === 'split'"
+          (click)="setPayMethod('split')"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            [attr.stroke]="payMethod === 'split' ? '#0891b2' : '#6b7280'"
+            stroke-width="2"
+          >
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+          </svg>
+          E-Wallet
+        </button>
+        <button
+          class="pm-btn"
+          [class.active]="payMethod === 'credit'"
+          (click)="setPayMethod('credit')"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            [attr.stroke]="payMethod === 'credit' ? '#7c3aed' : '#6b7280'"
+            stroke-width="2"
+          >
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+          </svg>
+          Other
+        </button>
+      </div>
+
+      <!-- Cash tendered (shown when cash/split) -->
+      <div class="tender-strip" *ngIf="payMethod === 'cash' || payMethod === 'split'">
+        <div class="ts-field">
+          <label>{{ payMethod === 'split' ? 'Cash' : 'Tendered' }}</label>
+          <div class="ts-input">
+            <span>BD</span>
+            <input
+              #cashInput
+              type="number"
+              [(ngModel)]="cashAmount"
+              placeholder="0.000"
+              step="0.001"
+              (ngModelChange)="calcChange()"
+            />
+          </div>
+        </div>
+        <div class="ts-field" *ngIf="payMethod === 'split'">
+          <label>Card</label>
+          <div class="ts-input">
+            <span>BD</span>
+            <input
+              type="number"
+              [(ngModel)]="cardAmount"
+              placeholder="0.000"
+              step="0.001"
+              (ngModelChange)="calcChange()"
+            />
+          </div>
+        </div>
+        <div class="change-chip" *ngIf="change > 0.0005">
+          <span>Change</span><strong>BD {{ change | number: '1.3-3' }}</strong>
+        </div>
+      </div>
+    </div>
+    <!-- /pos-right -->
+  </div>
+  <!-- /pos-body -->
+
+  <!-- ══ HELD ORDERS OVERLAY ══ -->
+  <div class="overlay" [class.show]="showHeldPanel" (click)="showHeldPanel = false">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-hd">
+        <span>Held Orders</span>
+        <button (click)="showHeldPanel = false">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="empty-modal" *ngIf="heldOrders.length === 0">No held orders</div>
+        <div class="held-row" *ngFor="let h of heldOrders">
+          <div class="held-info">
+            <p>{{ h.customer }}</p>
+            <span
+              >{{ h.items.length }} items · BD {{ h.subtotal | number: '1.3-3' }} ·
+              {{ h.time | date: 'HH:mm' }}</span
+            >
+          </div>
+          <div style="display: flex; gap: 8px">
+            <button class="btn-recall" (click)="recallOrder(h)">Recall</button>
+            <button class="btn-del-held" (click)="deleteHeld(h.id)">✕</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CALCULATOR OVERLAY ══ -->
+  <div class="overlay" [class.show]="showCalculator" (click)="showCalculator = false">
+    <div class="calc-box" (click)="$event.stopPropagation()">
+      <div class="modal-hd">
+        <span>Calculator</span><button (click)="showCalculator = false">✕</button>
+      </div>
+      <div class="calc-screen">
+        <div class="calc-expr">{{ calcExpression }}</div>
+        <div class="calc-val">{{ calcDisplay }}</div>
+      </div>
+      <div class="calc-keys">
+        <button class="ck fn" (click)="calcPress('C')">C</button>
+        <button class="ck fn" (click)="calcPress('⌫')">⌫</button>
+        <button class="ck fn" (click)="calcPress('%')">%</button>
+        <button class="ck op" (click)="calcPress('÷')">÷</button>
+        <button class="ck" (click)="calcPress('7')">7</button>
+        <button class="ck" (click)="calcPress('8')">8</button>
+        <button class="ck" (click)="calcPress('9')">9</button>
+        <button class="ck op" (click)="calcPress('×')">×</button>
+        <button class="ck" (click)="calcPress('4')">4</button>
+        <button class="ck" (click)="calcPress('5')">5</button>
+        <button class="ck" (click)="calcPress('6')">6</button>
+        <button class="ck op" (click)="calcPress('-')">−</button>
+        <button class="ck" (click)="calcPress('1')">1</button>
+        <button class="ck" (click)="calcPress('2')">2</button>
+        <button class="ck" (click)="calcPress('3')">3</button>
+        <button class="ck op" (click)="calcPress('+')">+</button>
+        <button class="ck wide" (click)="calcPress('0')">0</button>
+        <button class="ck" (click)="calcPress('.')">.</button>
+        <button class="ck eq" (click)="calcPress('=')">=</button>
+      </div>
+      <button class="calc-use" (click)="calcUseResult()">
+        → Use as cash &nbsp; {{ calcDisplay }}
+      </button>
+    </div>
+  </div>
+</div>

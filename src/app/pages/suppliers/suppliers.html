@@ -1,0 +1,1473 @@
+<!-- suppliers.html — full rebuild with payments, contact details, supplier products -->
+<div class="sup-page" [style.background-image]="'url(bg.png)'">
+  <app-header pageTitle="Suppliers" />
+
+  <div class="sup-body">
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="sidebar">
+      <nav>
+        <div class="nav-section">Overview</div>
+        <div class="nav-item" [class.active]="view === 'overview'" (click)="setView('overview')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+          </svg>
+          Overview
+        </div>
+
+        <div class="nav-section">Suppliers</div>
+        <div class="nav-item" [class.active]="view === 'list'" (click)="setView('list')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          All suppliers
+          <span class="nav-badge blue">{{ stats.total }}</span>
+        </div>
+        <div
+          class="nav-item"
+          [class.active]="view === 'add' && formMode === 'add'"
+          (click)="openAdd()"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          Add supplier
+        </div>
+
+        <div class="nav-section">Finance</div>
+        <div class="nav-item" [class.active]="view === 'payments'" (click)="setView('payments')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <rect x="1" y="4" width="22" height="16" rx="2" />
+            <line x1="1" y1="10" x2="23" y2="10" />
+          </svg>
+          Outstanding balances
+          <span class="nav-badge red" *ngIf="stats.totalOutstanding > 0">!</span>
+        </div>
+
+        <div class="nav-section">Procurement</div>
+        <div class="nav-item" [class.active]="view === 'orders'" (click)="setView('orders')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+          </svg>
+          Purchase orders
+          <span class="nav-badge amber" *ngIf="stats.pendingOrders > 0">{{
+            stats.pendingOrders
+          }}</span>
+        </div>
+        <div class="nav-item" [class.active]="view === 'products'" (click)="setView('products')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+            />
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+            <line x1="12" y1="22.08" x2="12" y2="12" />
+          </svg>
+          Supplier products
+        </div>
+      </nav>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <main class="sup-main">
+      <!-- ════════════════════════════════════════════════
+           OVERVIEW
+      ════════════════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'overview'">
+        <div class="topbar">
+          <h2>Supplier overview</h2>
+          <button class="btn primary" (click)="openAdd()">+ Add supplier</button>
+          <button class="btn" (click)="exportCSV()">Export CSV</button>
+        </div>
+        <div class="content">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon si-blue">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Total suppliers</span>
+                <span class="stat-val">{{ stats.total }}</span>
+                <span class="stat-sub">{{ stats.activeThisMonth }} active this month</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-green">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <line x1="12" y1="1" x2="12" y2="23" />
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Total spend</span>
+                <span class="stat-val">{{ bd(stats.totalSpend) }}</span>
+                <span class="stat-sub">{{ bd(stats.totalPaid) }} paid</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-amber">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Pending orders</span>
+                <span class="stat-val" [class.amber]="stats.pendingOrders > 0">{{
+                  stats.pendingOrders
+                }}</span>
+                <span class="stat-sub">{{ bd(stats.pendingValue) }} value</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-red">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <rect x="1" y="4" width="22" height="16" rx="2" />
+                  <line x1="1" y1="10" x2="23" y2="10" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Outstanding balance</span>
+                <span class="stat-val" [class.red]="stats.totalOutstanding > 0">{{
+                  bd(stats.totalOutstanding)
+                }}</span>
+                <span class="stat-sub">Unpaid to suppliers</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top suppliers -->
+          <div class="card">
+            <div class="card-head">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#185FA5"
+                stroke-width="2"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+              </svg>
+              <h3>Top suppliers by spend</h3>
+              <button class="btn-sm" (click)="setView('list')">View all</button>
+            </div>
+            <div class="empty-state" *ngIf="suppliers.length === 0">
+              No suppliers yet — add your first!
+            </div>
+            <table class="table" *ngIf="suppliers.length > 0">
+              <thead>
+                <tr>
+                  <th>Supplier</th>
+                  <th>Contact</th>
+                  <th>Orders</th>
+                  <th>Total spend</th>
+                  <th>Paid</th>
+                  <th>Outstanding</th>
+                  <th>Last order</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  *ngFor="let s of topSuppliersByValue"
+                  class="clickable-row"
+                  (click)="openDetail(s)"
+                >
+                  <td>
+                    <div class="sup-name-cell">
+                      <div class="avatar" [style.background]="avatarColor(s.Name)">
+                        {{ initials(s.Name) }}
+                      </div>
+                      <div>
+                        <div class="td-name">{{ s.Name }}</div>
+                        <div class="td-sub" *ngIf="s.PaymentTerms">{{ s.PaymentTerms }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="td-muted">{{ s.ContactPerson ?? '—' }}</td>
+                  <td>{{ s.TotalOrders }}</td>
+                  <td class="td-spend">{{ bd(s.TotalValue) }}</td>
+                  <td class="td-muted">—</td>
+                  <td>
+                    <span
+                      class="balance-chip"
+                      [class.balance-chip-red]="s.OutstandingBalance > 0"
+                      *ngIf="s.OutstandingBalance > 0"
+                    >
+                      {{ bd(s.OutstandingBalance) }}
+                    </span>
+                    <span class="td-muted" *ngIf="s.OutstandingBalance <= 0">—</span>
+                  </td>
+                  <td class="td-muted">
+                    {{ s.LastOrderAt ? (s.LastOrderAt | date: 'dd MMM yyyy') : '—' }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Outstanding callout -->
+          <div class="alert-banner" *ngIf="outstandingSuppliers.length > 0">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+              />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            <span>
+              <strong>{{ outstandingSuppliers.length }} supplier(s)</strong> have outstanding
+              balances totalling
+              <strong>{{ bd(stats.totalOutstanding) }}</strong>
+            </span>
+            <button class="btn-sm primary" (click)="setView('payments')">View balances</button>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ════════════════════════════════════════════════
+           ALL SUPPLIERS LIST
+      ════════════════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'list'">
+        <div class="topbar">
+          <h2>All suppliers</h2>
+          <input
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="applyFilter()"
+            placeholder="Search name, phone, contact…"
+            class="search-input"
+          />
+          <button class="btn primary" (click)="openAdd()">+ Add supplier</button>
+          <button class="btn" (click)="exportCSV()">Export CSV</button>
+        </div>
+        <div class="content">
+          <div class="card">
+            <div class="empty-state" *ngIf="filteredSuppliers.length === 0">
+              No suppliers match your search
+            </div>
+            <table class="table" *ngIf="filteredSuppliers.length > 0">
+              <thead>
+                <tr>
+                  <th class="sortable" (click)="sortBy('Name')">Supplier {{ sortIcon('Name') }}</th>
+                  <th>Contact</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th class="sortable" (click)="sortBy('TotalOrders')">
+                    Orders {{ sortIcon('TotalOrders') }}
+                  </th>
+                  <th class="sortable" (click)="sortBy('TotalValue')">
+                    Spend {{ sortIcon('TotalValue') }}
+                  </th>
+                  <th class="sortable" (click)="sortBy('OutstandingBalance')">
+                    Outstanding {{ sortIcon('OutstandingBalance') }}
+                  </th>
+                  <th>Payment terms</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let s of filteredSuppliers">
+                  <td>
+                    <div class="sup-name-cell" (click)="openDetail(s)" style="cursor: pointer">
+                      <div class="avatar" [style.background]="avatarColor(s.Name)">
+                        {{ initials(s.Name) }}
+                      </div>
+                      <span class="td-name">{{ s.Name }}</span>
+                    </div>
+                  </td>
+                  <td class="td-muted">{{ s.ContactPerson ?? '—' }}</td>
+                  <td class="td-muted">{{ s.Phone ?? '—' }}</td>
+                  <td class="td-muted">{{ s.Email ?? '—' }}</td>
+                  <td>{{ s.TotalOrders }}</td>
+                  <td class="td-spend">{{ bd(s.TotalValue) }}</td>
+                  <td>
+                    <span class="balance-chip balance-chip-red" *ngIf="s.OutstandingBalance > 0">{{
+                      bd(s.OutstandingBalance)
+                    }}</span>
+                    <span class="td-muted" *ngIf="s.OutstandingBalance <= 0">Paid up</span>
+                  </td>
+                  <td class="td-muted">{{ s.PaymentTerms ?? '—' }}</td>
+                  <td>
+                    <div class="action-btns">
+                      <button class="btn-sm" (click)="openDetail(s)">View</button>
+                      <button class="btn-sm" (click)="openEdit(s)">Edit</button>
+                      <button class="btn-sm red" (click)="deleteSupplier(s)">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ════════════════════════════════════════════════
+           ADD / EDIT FORM
+      ════════════════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'add'">
+        <div class="topbar">
+          <h2>{{ formMode === 'add' ? 'Add supplier' : 'Edit supplier' }}</h2>
+          <button class="btn" (click)="setView('list')">← Back</button>
+        </div>
+        <div class="content">
+          <div class="card form-card">
+            <div class="card-head">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#185FA5"
+                stroke-width="2"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+              </svg>
+              <h3>Company information</h3>
+            </div>
+            <div class="form-grid three-col">
+              <div class="form-field">
+                <label>Supplier / company name <span class="req">*</span></label>
+                <input
+                  [(ngModel)]="form.name"
+                  class="form-input"
+                  placeholder="e.g. Acme Distributors"
+                />
+              </div>
+              <div class="form-field">
+                <label>Contact person</label>
+                <input
+                  [(ngModel)]="form.contactPerson"
+                  class="form-input"
+                  placeholder="Full name"
+                />
+              </div>
+              <div class="form-field">
+                <label>Currency</label>
+                <select [(ngModel)]="form.currency" class="form-select">
+                  <option value="BHD">BHD — Bahraini Dinar</option>
+                  <option value="USD">USD — US Dollar</option>
+                  <option value="EUR">EUR — Euro</option>
+                  <option value="GBP">GBP — British Pound</option>
+                  <option value="SAR">SAR — Saudi Riyal</option>
+                  <option value="AED">AED — UAE Dirham</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="section-divider">Contact details</div>
+            <div class="form-grid three-col">
+              <div class="form-field">
+                <label>Primary phone</label>
+                <input [(ngModel)]="form.phone" class="form-input" placeholder="+973 3xxx xxxx" />
+              </div>
+              <div class="form-field">
+                <label>Secondary phone</label>
+                <input [(ngModel)]="form.phone2" class="form-input" placeholder="+973 17xx xxxx" />
+              </div>
+              <div class="form-field">
+                <label>WhatsApp</label>
+                <input
+                  [(ngModel)]="form.whatsApp"
+                  class="form-input"
+                  placeholder="+973 3xxx xxxx"
+                />
+              </div>
+              <div class="form-field">
+                <label>Email</label>
+                <input
+                  [(ngModel)]="form.email"
+                  type="email"
+                  class="form-input"
+                  placeholder="orders@supplier.com"
+                />
+              </div>
+              <div class="form-field">
+                <label>Website</label>
+                <input
+                  [(ngModel)]="form.website"
+                  class="form-input"
+                  placeholder="https://supplier.com"
+                />
+              </div>
+              <div class="form-field full-width-col">
+                <label>Address</label>
+                <input
+                  [(ngModel)]="form.address"
+                  class="form-input"
+                  placeholder="Street, City, Country"
+                />
+              </div>
+            </div>
+
+            <div class="section-divider">Commercial terms</div>
+            <div class="form-grid three-col">
+              <div class="form-field">
+                <label>Payment terms</label>
+                <select [(ngModel)]="form.paymentTerms" class="form-select">
+                  <option value="">Select…</option>
+                  <option value="COD">COD — Cash on delivery</option>
+                  <option value="Net 7">Net 7 days</option>
+                  <option value="Net 15">Net 15 days</option>
+                  <option value="Net 30">Net 30 days</option>
+                  <option value="Net 45">Net 45 days</option>
+                  <option value="Net 60">Net 60 days</option>
+                  <option value="50% upfront">50% upfront</option>
+                  <option value="Prepaid">Prepaid</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Lead time (days)</label>
+                <input
+                  type="number"
+                  [(ngModel)]="form.leadTimeDays"
+                  class="form-input"
+                  placeholder="e.g. 7"
+                  min="1"
+                />
+              </div>
+            </div>
+
+            <div class="section-divider">Notes</div>
+            <div class="form-grid two-col">
+              <div class="form-field full-width-col">
+                <label>Internal notes</label>
+                <textarea
+                  [(ngModel)]="form.notes"
+                  class="form-textarea"
+                  rows="3"
+                  placeholder="Special instructions, quality notes, history…"
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="form-footer">
+              <span class="form-error" *ngIf="formError">{{ formError }}</span>
+              <button class="btn" (click)="setView('list')">Cancel</button>
+              <button
+                class="btn primary"
+                (click)="saveSupplier()"
+                [disabled]="formSaving || !form.name.trim()"
+                [class.success]="formSuccess"
+              >
+                {{
+                  formSaving
+                    ? 'Saving…'
+                    : formSuccess
+                      ? '✓ Saved!'
+                      : formMode === 'add'
+                        ? 'Add supplier'
+                        : 'Update supplier'
+                }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ════════════════════════════════════════════════
+           SUPPLIER DETAIL
+      ════════════════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'detail' && selected">
+        <div class="topbar">
+          <h2>{{ selected.Name }}</h2>
+          <button class="btn" (click)="setView('list')">← Back</button>
+          <button class="btn" (click)="openEdit(selected!)">Edit</button>
+          <button class="btn red" (click)="deleteSupplier(selected!)">Delete</button>
+        </div>
+        <div class="content">
+          <!-- Profile hero -->
+          <div class="profile-hero">
+            <div class="profile-avatar-wrap">
+              <div class="profile-avatar" [style.background]="avatarColor(selected.Name)">
+                {{ initials(selected.Name) }}
+              </div>
+              <div class="profile-name-block">
+                <h3>{{ selected.Name }}</h3>
+                <span class="terms-tag" *ngIf="selected.PaymentTerms">{{
+                  selected.PaymentTerms
+                }}</span>
+                <span class="terms-tag lead" *ngIf="selected.LeadTimeDays"
+                  >{{ selected.LeadTimeDays }}d lead</span
+                >
+              </div>
+            </div>
+            <div class="profile-kpis">
+              <div class="kpi">
+                <span class="kpi-val">{{ selected.TotalOrders }}</span>
+                <span class="kpi-label">Orders</span>
+              </div>
+              <div class="kpi">
+                <span class="kpi-val">{{ bd(selected.TotalValue) }}</span>
+                <span class="kpi-label">Total spend</span>
+              </div>
+              <div class="kpi">
+                <span class="kpi-val" [class.kpi-amber]="selected.PendingOrders > 0">{{
+                  selected.PendingOrders
+                }}</span>
+                <span class="kpi-label">Pending POs</span>
+              </div>
+              <div class="kpi">
+                <span class="kpi-val" [class.kpi-red]="selected.OutstandingBalance > 0">
+                  {{ selected.OutstandingBalance > 0 ? bd(selected.OutstandingBalance) : '—' }}
+                </span>
+                <span class="kpi-label">Outstanding</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab strip -->
+          <div class="tab-strip">
+            <button
+              class="tab-btn"
+              [class.active]="detailTab === 'orders'"
+              (click)="detailTab = 'orders'"
+            >
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              Purchase orders
+              <span class="tab-count">{{ supplierPOs.length }}</span>
+            </button>
+            <button
+              class="tab-btn"
+              [class.active]="detailTab === 'balance'"
+              (click)="detailTab = 'balance'"
+            >
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="1" y="4" width="22" height="16" rx="2" />
+                <line x1="1" y1="10" x2="23" y2="10" />
+              </svg>
+              Payments &amp; balance
+              <span class="tab-count warn" *ngIf="balance.outstanding > 0">{{
+                bd(balance.outstanding)
+              }}</span>
+            </button>
+            <button
+              class="tab-btn"
+              [class.active]="detailTab === 'products'"
+              (click)="detailTab = 'products'"
+            >
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+                />
+              </svg>
+              Products supplied
+              <span class="tab-count">{{ supplierProducts.length }}</span>
+            </button>
+            <button
+              class="tab-btn"
+              [class.active]="detailTab === 'contact'"
+              (click)="detailTab = 'contact'"
+            >
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              Contact &amp; info
+            </button>
+          </div>
+
+          <!-- ── TAB: Purchase orders ── -->
+          <div class="card" *ngIf="detailTab === 'orders'">
+            <div class="empty-state" *ngIf="detailLoading">Loading…</div>
+            <div class="empty-state" *ngIf="!detailLoading && supplierPOs.length === 0">
+              No purchase orders yet
+            </div>
+            <table class="table" *ngIf="!detailLoading && supplierPOs.length > 0">
+              <thead>
+                <tr>
+                  <th>PO number</th>
+                  <th>Invoice</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Paid</th>
+                  <th>Balance</th>
+                  <th>Expected</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let po of supplierPOs">
+                  <td class="td-po">{{ po.PoNumber }}</td>
+                  <td class="td-muted">{{ po.InvoiceNumber ?? '—' }}</td>
+                  <td>{{ po.ItemCount }}</td>
+                  <td class="td-spend">{{ bd(po.TotalAmount) }}</td>
+                  <td class="td-muted">{{ po.AmountPaid ? bd(po.AmountPaid) : '—' }}</td>
+                  <td>
+                    <span class="balance-chip balance-chip-red" *ngIf="payBalanceOnPO(po) > 0">{{
+                      bd(payBalanceOnPO(po))
+                    }}</span>
+                    <span class="td-muted" *ngIf="payBalanceOnPO(po) <= 0">Paid</span>
+                  </td>
+                  <td class="td-muted">
+                    {{ po.ExpectedDate ? (po.ExpectedDate | date: 'dd MMM') : '—' }}
+                  </td>
+                  <td class="td-muted">{{ po.CreatedAt | date: 'dd MMM yyyy' }}</td>
+                  <td>
+                    <span class="pill" [ngClass]="poStatusClass(po.Status)">{{ po.Status }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- ── TAB: Payments & Balance ── -->
+          <ng-container *ngIf="detailTab === 'balance'">
+            <!-- Balance summary cards -->
+            <div class="balance-summary">
+              <div class="bal-card">
+                <span class="bal-label">Total ordered</span>
+                <span class="bal-val">{{ bd(balance.totalOrdered) }}</span>
+              </div>
+              <div class="bal-sep">−</div>
+              <div class="bal-card">
+                <span class="bal-label">Total paid</span>
+                <span class="bal-val green-val">{{ bd(balance.totalPaid) }}</span>
+              </div>
+              <div class="bal-sep">=</div>
+              <div class="bal-card highlight" [class.highlight-red]="balance.outstanding > 0">
+                <span class="bal-label">Outstanding</span>
+                <span class="bal-val">{{ bd(balance.outstanding) }}</span>
+              </div>
+            </div>
+
+            <!-- Record payment -->
+            <div class="card" style="margin-bottom: 12px">
+              <div class="card-head">
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#185FA5"
+                  stroke-width="2"
+                >
+                  <rect x="1" y="4" width="22" height="16" rx="2" />
+                  <line x1="1" y1="10" x2="23" y2="10" />
+                </svg>
+                <h3>Record a payment</h3>
+                <button class="btn-sm" (click)="togglePayForm()">
+                  {{ payFormOpen ? 'Cancel' : '+ New payment' }}
+                </button>
+              </div>
+              <div class="pay-form" *ngIf="payFormOpen">
+                <div class="form-grid three-col" style="padding: 14px 16px 0">
+                  <div class="form-field">
+                    <label>Amount ({{ selected.Currency }})</label>
+                    <input
+                      type="number"
+                      [(ngModel)]="payForm.amount"
+                      class="form-input"
+                      placeholder="0.000"
+                      step="0.001"
+                      min="0"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label>Payment method</label>
+                    <select [(ngModel)]="payForm.method" class="form-select">
+                      <option value="bank">Bank transfer</option>
+                      <option value="cash">Cash</option>
+                      <option value="cheque">Cheque</option>
+                      <option value="card">Card</option>
+                    </select>
+                  </div>
+                  <div class="form-field">
+                    <label>Date</label>
+                    <input type="date" [(ngModel)]="payForm.paidAt" class="form-input" />
+                  </div>
+                  <div class="form-field">
+                    <label>Link to PO (optional)</label>
+                    <select [(ngModel)]="payForm.purchaseOrderId" class="form-select">
+                      <option [ngValue]="null">General payment</option>
+                      <option *ngFor="let po of supplierPOs" [ngValue]="po.Id">
+                        {{ po.PoNumber }} — {{ bd(po.TotalAmount) }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="form-field">
+                    <label>Reference / cheque no.</label>
+                    <input
+                      [(ngModel)]="payForm.reference"
+                      class="form-input"
+                      placeholder="REF-2024-001"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label>Note</label>
+                    <input
+                      [(ngModel)]="payForm.note"
+                      class="form-input"
+                      placeholder="Optional note…"
+                    />
+                  </div>
+                </div>
+                <div class="pay-form-footer">
+                  <span class="form-error" *ngIf="payError">{{ payError }}</span>
+                  <button
+                    class="btn primary"
+                    (click)="savePayment()"
+                    [disabled]="paySaving || !payForm.amount || payForm.amount <= 0"
+                    [class.success]="paySuccess"
+                  >
+                    {{ paySaving ? 'Saving…' : paySuccess ? '✓ Recorded!' : 'Record payment' }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Payment history -->
+              <div
+                class="empty-state"
+                *ngIf="!detailLoading && supplierPayments.length === 0 && !payFormOpen"
+              >
+                No payments recorded yet
+              </div>
+              <table class="table" *ngIf="supplierPayments.length > 0">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Reference</th>
+                    <th>Linked PO</th>
+                    <th>Note</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let p of supplierPayments">
+                    <td class="td-muted">{{ p.PaidAt | date: 'dd MMM yyyy' }}</td>
+                    <td class="td-spend">{{ bd(p.Amount) }}</td>
+                    <td>
+                      <span class="method-pill" [ngClass]="p.Method">{{ p.Method }}</span>
+                    </td>
+                    <td class="td-muted">{{ p.Reference ?? '—' }}</td>
+                    <td class="td-po">{{ p.PoNumber ?? '—' }}</td>
+                    <td class="td-muted">{{ p.Note ?? '—' }}</td>
+                    <td>
+                      <button class="btn-sm red" (click)="deletePayment(p.Id)">Remove</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Per-PO breakdown -->
+            <div class="card" *ngIf="balance.poBreakdown.length > 0">
+              <div class="card-head">
+                <h3>Per-order balance breakdown</h3>
+              </div>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>PO number</th>
+                    <th>Order date</th>
+                    <th>Status</th>
+                    <th>Order total</th>
+                    <th>Amount paid</th>
+                    <th>Remaining</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let b of balance.poBreakdown">
+                    <td class="td-po">{{ b.PoNumber }}</td>
+                    <td class="td-muted">{{ b.CreatedAt | date: 'dd MMM yyyy' }}</td>
+                    <td>
+                      <span class="pill" [ngClass]="poStatusClass(b.Status)">{{ b.Status }}</span>
+                    </td>
+                    <td class="td-spend">{{ bd(b.TotalAmount) }}</td>
+                    <td class="td-muted">{{ bd(b.AmountPaid) }}</td>
+                    <td>
+                      <span class="balance-chip balance-chip-red" *ngIf="b.Balance > 0">{{
+                        bd(b.Balance)
+                      }}</span>
+                      <span class="paid-tick" *ngIf="b.Balance <= 0">✓ Paid</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </ng-container>
+
+          <!-- ── TAB: Products supplied ── -->
+          <div class="card" *ngIf="detailTab === 'products'">
+            <div class="empty-state" *ngIf="detailLoading">Loading…</div>
+            <div class="empty-state" *ngIf="!detailLoading && supplierProducts.length === 0">
+              No products ordered from this supplier yet
+            </div>
+            <table class="table" *ngIf="!detailLoading && supplierProducts.length > 0">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>SKU</th>
+                  <th>Category</th>
+                  <th>Stock</th>
+                  <th>Level</th>
+                  <th>Times ordered</th>
+                  <th>Total qty</th>
+                  <th>Avg cost</th>
+                  <th>Sale price</th>
+                  <th>Margin</th>
+                  <th>Last ordered</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let p of supplierProducts">
+                  <td class="td-name">{{ p.Name }}</td>
+                  <td class="td-muted">{{ p.SKU ?? '—' }}</td>
+                  <td class="td-muted">{{ p.CategoryName ?? '—' }}</td>
+                  <td
+                    [class.qty-neg]="p.StockQty <= 0"
+                    [class.qty-amber]="p.StockQty > 0 && p.StockQty <= p.LowStockThreshold"
+                  >
+                    {{ p.StockQty }}
+                  </td>
+                  <td>
+                    <div class="stock-bar-wrap">
+                      <div
+                        class="stock-bar"
+                        [style.width.%]="stockBarWidth(p)"
+                        [style.background]="stockBarColor(p)"
+                      ></div>
+                    </div>
+                  </td>
+                  <td>{{ p.OrderCount }}</td>
+                  <td>{{ p.TotalQtyOrdered }}</td>
+                  <td class="td-muted">{{ bd(p.AvgUnitCost) }}</td>
+                  <td>{{ bd(p.SalePrice) }}</td>
+                  <td>
+                    <span class="margin-badge" [ngClass]="marginClass(p)">{{ margin(p) }}</span>
+                  </td>
+                  <td class="td-muted">{{ p.LastOrdered | date: 'dd MMM yyyy' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- ── TAB: Contact & info ── -->
+          <div class="card" *ngIf="detailTab === 'contact'">
+            <div class="contact-grid">
+              <div class="contact-section">
+                <div class="contact-section-title">Contact details</div>
+                <div class="contact-row">
+                  <div class="contact-icon">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                  </div>
+                  <div class="contact-detail">
+                    <span class="contact-label">Contact person</span>
+                    <span class="contact-val">{{ selected.ContactPerson ?? '—' }}</span>
+                  </div>
+                </div>
+                <div class="contact-row">
+                  <div class="contact-icon">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.59 1.23h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6 6l.88-.88a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.73 16.92z"
+                      />
+                    </svg>
+                  </div>
+                  <div class="contact-detail">
+                    <span class="contact-label">Primary phone</span>
+                    <span class="contact-val">{{ selected.Phone ?? '—' }}</span>
+                  </div>
+                </div>
+                <div class="contact-row" *ngIf="selected.Phone2">
+                  <div class="contact-icon">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.59 1.23h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6 6l.88-.88a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.73 16.92z"
+                      />
+                    </svg>
+                  </div>
+                  <div class="contact-detail">
+                    <span class="contact-label">Secondary phone</span>
+                    <span class="contact-val">{{ selected.Phone2 }}</span>
+                  </div>
+                </div>
+                <div class="contact-row" *ngIf="selected.WhatsApp">
+                  <div class="contact-icon">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#25d366"
+                      stroke-width="2"
+                    >
+                      <path
+                        d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                      />
+                    </svg>
+                  </div>
+                  <div class="contact-detail">
+                    <span class="contact-label">WhatsApp</span>
+                    <span class="contact-val">{{ selected.WhatsApp }}</span>
+                  </div>
+                </div>
+                <div class="contact-row">
+                  <div class="contact-icon">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+                      />
+                      <polyline points="22,6 12,13 2,6" />
+                    </svg>
+                  </div>
+                  <div class="contact-detail">
+                    <span class="contact-label">Email</span>
+                    <span class="contact-val">{{ selected.Email ?? '—' }}</span>
+                  </div>
+                </div>
+                <div class="contact-row" *ngIf="selected.Website">
+                  <div class="contact-icon">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="2" y1="12" x2="22" y2="12" />
+                      <path
+                        d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+                      />
+                    </svg>
+                  </div>
+                  <div class="contact-detail">
+                    <span class="contact-label">Website</span>
+                    <a class="contact-link" [href]="selected.Website" target="_blank">{{
+                      selected.Website
+                    }}</a>
+                  </div>
+                </div>
+                <div class="contact-row">
+                  <div class="contact-icon">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                  </div>
+                  <div class="contact-detail">
+                    <span class="contact-label">Address</span>
+                    <span class="contact-val">{{ selected.Address ?? '—' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="contact-section">
+                <div class="contact-section-title">Commercial terms</div>
+                <div class="contact-row">
+                  <div class="contact-icon">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <rect x="1" y="4" width="22" height="16" rx="2" />
+                      <line x1="1" y1="10" x2="23" y2="10" />
+                    </svg>
+                  </div>
+                  <div class="contact-detail">
+                    <span class="contact-label">Payment terms</span>
+                    <span class="contact-val">{{ selected.PaymentTerms ?? '—' }}</span>
+                  </div>
+                </div>
+                <div class="contact-row">
+                  <div class="contact-icon">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                  </div>
+                  <div class="contact-detail">
+                    <span class="contact-label">Lead time</span>
+                    <span class="contact-val">{{
+                      selected.LeadTimeDays ? selected.LeadTimeDays + ' days' : '—'
+                    }}</span>
+                  </div>
+                </div>
+                <div class="contact-row">
+                  <div class="contact-icon">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <line x1="12" y1="1" x2="12" y2="23" />
+                      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                    </svg>
+                  </div>
+                  <div class="contact-detail">
+                    <span class="contact-label">Currency</span>
+                    <span class="contact-val">{{ selected.Currency }}</span>
+                  </div>
+                </div>
+                <div class="contact-row">
+                  <div class="contact-icon">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <rect x="3" y="4" width="18" height="18" rx="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                  </div>
+                  <div class="contact-detail">
+                    <span class="contact-label">Supplier since</span>
+                    <span class="contact-val">{{ selected.CreatedAt | date: 'dd MMM yyyy' }}</span>
+                  </div>
+                </div>
+
+                <div class="contact-section-title" style="margin-top: 20px">Notes</div>
+                <div class="notes-box">{{ selected.Notes || 'No notes added.' }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ════════════════════════════════════════════════
+           OUTSTANDING BALANCES (global)
+      ════════════════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'payments'">
+        <div class="topbar">
+          <h2>Outstanding balances</h2>
+          <button class="btn" (click)="exportCSV()">Export CSV</button>
+        </div>
+        <div class="content">
+          <div class="stats-grid three-col" style="margin-bottom: 14px">
+            <div class="stat-card">
+              <div class="stat-icon si-red">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <rect x="1" y="4" width="22" height="16" rx="2" />
+                  <line x1="1" y1="10" x2="23" y2="10" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Total outstanding</span>
+                <span class="stat-val red">{{ bd(stats.totalOutstanding) }}</span>
+                <span class="stat-sub">Unpaid to suppliers</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-amber">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Suppliers with balance</span>
+                <span class="stat-val amber">{{ outstandingSuppliers.length }}</span>
+                <span class="stat-sub">Need attention</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-green">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <line x1="12" y1="1" x2="12" y2="23" />
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Total paid to date</span>
+                <span class="stat-val">{{ bd(stats.totalPaid) }}</span>
+                <span class="stat-sub">All suppliers</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>Suppliers with outstanding balance</h3>
+            </div>
+            <div class="empty-state" *ngIf="paymentsLoading">Loading…</div>
+            <div class="empty-state" *ngIf="!paymentsLoading && outstandingRows.length === 0">
+              🎉 All suppliers are fully paid!
+            </div>
+            <table class="table" *ngIf="!paymentsLoading && outstandingRows.length > 0">
+              <thead>
+                <tr>
+                  <th>Supplier</th>
+                  <th>Contact</th>
+                  <th>Phone</th>
+                  <th>Pending orders value</th>
+                  <th>Payments made</th>
+                  <th>Outstanding</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let r of outstandingRows">
+                  <td>
+                    <div class="sup-name-cell">
+                      <div class="avatar" [style.background]="avatarColor(r.Name)">
+                        {{ initials(r.Name) }}
+                      </div>
+                      <span class="td-name">{{ r.Name }}</span>
+                    </div>
+                  </td>
+                  <td class="td-muted">{{ r.ContactPerson ?? '—' }}</td>
+                  <td class="td-muted">{{ r.Phone ?? '—' }}</td>
+                  <td class="td-spend">{{ bd(r.PendingValue) }}</td>
+                  <td class="td-muted">{{ bd(r.TotalPaid) }}</td>
+                  <td>
+                    <span class="balance-chip balance-chip-red">{{ bd(r.Outstanding) }}</span>
+                  </td>
+                  <td>
+                    <button
+                      class="btn-sm primary"
+                      (click)="openDetail(getSupplier(r.Id)); detailTab = 'balance'"
+                    >
+                      Pay now
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ════════════════════════════════════════════════
+           ALL PURCHASE ORDERS
+      ════════════════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'orders'">
+        <div class="topbar">
+          <h2>Purchase orders</h2>
+          <input
+            [(ngModel)]="orderSearch"
+            placeholder="Search PO or supplier…"
+            class="search-input"
+          />
+          <select [(ngModel)]="orderStatusFilter" class="filter-select">
+            <option value="">All statuses</option>
+            <option value="draft">Draft</option>
+            <option value="pending">Pending</option>
+            <option value="received">Received</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="content">
+          <div class="stats-grid three-col" style="margin-bottom: 14px">
+            <div class="stat-card">
+              <div class="stat-icon si-amber">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Pending orders</span>
+                <span class="stat-val amber">{{ stats.pendingOrders }}</span>
+                <span class="stat-sub">{{ bd(stats.pendingValue) }} outstanding</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-blue">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Total orders</span>
+                <span class="stat-val">{{ allOrders.length }}</span>
+                <span class="stat-sub">All time</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-green">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Total spend</span>
+                <span class="stat-val">{{ bd(stats.totalSpend) }}</span>
+                <span class="stat-sub">Received orders</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="empty-state" *ngIf="ordersLoading">Loading…</div>
+            <div class="empty-state" *ngIf="!ordersLoading && filteredAllOrders.length === 0">
+              No orders match your filters
+            </div>
+            <table class="table" *ngIf="!ordersLoading && filteredAllOrders.length > 0">
+              <thead>
+                <tr>
+                  <th>PO number</th>
+                  <th>Supplier</th>
+                  <th>Invoice</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Expected</th>
+                  <th>Created</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let po of filteredAllOrders">
+                  <td class="td-po">{{ po.PoNumber }}</td>
+                  <td>
+                    <div class="sup-name-cell">
+                      <div class="avatar sm" [style.background]="avatarColor(po.SupplierName)">
+                        {{ initials(po.SupplierName) }}
+                      </div>
+                      {{ po.SupplierName }}
+                    </div>
+                  </td>
+                  <td class="td-muted">{{ po.InvoiceNumber ?? '—' }}</td>
+                  <td>{{ po.ItemCount }}</td>
+                  <td class="td-spend">{{ bd(po.TotalAmount) }}</td>
+                  <td class="td-muted">
+                    {{ po.ExpectedDate ? (po.ExpectedDate | date: 'dd MMM yyyy') : '—' }}
+                  </td>
+                  <td class="td-muted">{{ po.CreatedAt | date: 'dd MMM yyyy' }}</td>
+                  <td>
+                    <span class="pill" [ngClass]="poStatusClass(po.Status)">{{ po.Status }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ════════════════════════════════════════════════
+           SUPPLIER PRODUCTS (global)
+      ════════════════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'products'">
+        <div class="topbar">
+          <h2>Supplier products</h2>
+          <input
+            [(ngModel)]="productSearch"
+            placeholder="Search product, SKU, supplier…"
+            class="search-input"
+          />
+          <select [(ngModel)]="productStockFilter" class="filter-select">
+            <option value="">All stock levels</option>
+            <option value="ok">In stock</option>
+            <option value="low">Low stock</option>
+            <option value="out">Out of stock</option>
+          </select>
+        </div>
+        <div class="content">
+          <div class="card">
+            <div class="empty-state" *ngIf="productsLoading">Loading…</div>
+            <div class="empty-state" *ngIf="!productsLoading && filteredAllProducts.length === 0">
+              No products found — create purchase orders to see supplier products here
+            </div>
+            <table class="table" *ngIf="!productsLoading && filteredAllProducts.length > 0">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Supplier</th>
+                  <th>SKU</th>
+                  <th>Stock</th>
+                  <th>Level</th>
+                  <th>Avg cost</th>
+                  <th>Sale price</th>
+                  <th>Margin</th>
+                  <th>Total ordered</th>
+                  <th>Last ordered</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let p of filteredAllProducts">
+                  <td class="td-name">{{ p.Name }}</td>
+                  <td>
+                    <div class="sup-name-cell">
+                      <div class="avatar sm" [style.background]="avatarColor(p.SupplierName)">
+                        {{ initials(p.SupplierName) }}
+                      </div>
+                      {{ p.SupplierName }}
+                    </div>
+                  </td>
+                  <td class="td-muted">{{ p.SKU ?? '—' }}</td>
+                  <td
+                    [class.qty-neg]="p.StockQty <= 0"
+                    [class.qty-amber]="p.StockQty > 0 && p.StockQty <= p.LowStockThreshold"
+                  >
+                    {{ p.StockQty }}
+                  </td>
+                  <td>
+                    <div class="stock-bar-wrap">
+                      <div
+                        class="stock-bar"
+                        [style.width.%]="stockBarWidth(p)"
+                        [style.background]="stockBarColor(p)"
+                      ></div>
+                    </div>
+                  </td>
+                  <td class="td-muted">{{ bd(p.AvgUnitCost) }}</td>
+                  <td>{{ bd(p.SalePrice) }}</td>
+                  <td>
+                    <span class="margin-badge" [ngClass]="marginClass(p)">{{ margin(p) }}</span>
+                  </td>
+                  <td>{{ p.TotalQtyOrdered }}</td>
+                  <td class="td-muted">{{ p.LastOrdered | date: 'dd MMM yyyy' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+    </main>
+  </div>
+</div>

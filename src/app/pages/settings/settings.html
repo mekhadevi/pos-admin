@@ -1,0 +1,1134 @@
+<!-- settings.html -->
+<div class="st-page" [style.background-image]="'url(bg.png)'">
+  <app-header pageTitle="Settings" />
+
+  <!-- ── TOAST ── -->
+  <div class="toast" *ngIf="toastMsg" [ngClass]="'toast-' + toastType">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.5"
+      *ngIf="toastType === 'success'"
+    >
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.5"
+      *ngIf="toastType === 'error'"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <line x1="15" y1="9" x2="9" y2="15" />
+      <line x1="9" y1="9" x2="15" y2="15" />
+    </svg>
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.5"
+      *ngIf="toastType === 'info'"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+    {{ toastMsg }}
+  </div>
+
+  <div class="st-body">
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="sidebar">
+      <nav>
+        <div class="nav-section">General</div>
+        <div class="nav-item" [class.active]="view === 'company'" (click)="setView('company')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
+          Company
+        </div>
+        <div class="nav-item" [class.active]="view === 'receipt'" (click)="setView('receipt')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polyline points="6 9 6 2 18 2 18 9" />
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+            <rect x="6" y="14" width="12" height="8" />
+          </svg>
+          Receipt
+        </div>
+        <div class="nav-item" [class.active]="view === 'tax'" (click)="setView('tax')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="12" y1="1" x2="12" y2="23" />
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+          Tax &amp; VAT
+        </div>
+
+        <div class="nav-section">Point of Sale</div>
+        <div class="nav-item" [class.active]="view === 'pos'" (click)="setView('pos')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <rect x="2" y="3" width="20" height="14" rx="2" />
+            <line x1="8" y1="21" x2="16" y2="21" />
+            <line x1="12" y1="17" x2="12" y2="21" />
+          </svg>
+          POS &amp; Sales
+        </div>
+        <div class="nav-item" [class.active]="view === 'inventory'" (click)="setView('inventory')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+            />
+          </svg>
+          Inventory
+        </div>
+        <div
+          class="nav-item"
+          [class.active]="view === 'notifications'"
+          (click)="setView('notifications')"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+          Notifications
+        </div>
+
+        <div class="nav-section">Administration</div>
+        <div class="nav-item" [class.active]="view === 'users'" (click)="setView('users')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          Users
+        </div>
+        <div class="nav-item" [class.active]="view === 'branches'" (click)="setView('branches')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          Branches
+        </div>
+        <div class="nav-item" [class.active]="view === 'about'" (click)="setView('about')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          About
+        </div>
+      </nav>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <main class="st-main">
+      <!-- ════════════════════════════════════
+           COMPANY
+      ════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'company'">
+        <div class="topbar">
+          <h2>Company information</h2>
+          <button class="btn" (click)="resetSection('company')">Reset defaults</button>
+          <button
+            class="btn primary"
+            (click)="save()"
+            [disabled]="saving"
+            [class.success]="saveSuccess"
+          >
+            {{ saving ? 'Saving…' : saveSuccess ? '✓ Saved!' : 'Save changes' }}
+          </button>
+        </div>
+        <div class="content">
+          <div class="settings-card">
+            <div class="sc-section-title">Business details</div>
+            <div class="form-grid two-col">
+              <div class="form-field">
+                <label>Company name <span class="req">*</span></label>
+                <input [(ngModel)]="company.name" class="form-input" placeholder="My POS Store" />
+              </div>
+              <div class="form-field">
+                <label>Tagline / slogan</label>
+                <input
+                  [(ngModel)]="company.tagline"
+                  class="form-input"
+                  placeholder="Quality you can trust"
+                />
+              </div>
+              <div class="form-field">
+                <label>VAT registration number</label>
+                <input
+                  [(ngModel)]="company.vatNumber"
+                  class="form-input"
+                  placeholder="VAT-000000"
+                />
+              </div>
+              <div class="form-field">
+                <label>CR / commercial registration</label>
+                <input [(ngModel)]="company.crNumber" class="form-input" placeholder="CR-000000" />
+              </div>
+            </div>
+
+            <div class="sc-section-title">Contact information</div>
+            <div class="form-grid two-col">
+              <div class="form-field">
+                <label>Phone</label>
+                <input
+                  [(ngModel)]="company.phone"
+                  class="form-input"
+                  placeholder="+973 17xx xxxx"
+                />
+              </div>
+              <div class="form-field">
+                <label>Email</label>
+                <input
+                  [(ngModel)]="company.email"
+                  type="email"
+                  class="form-input"
+                  placeholder="info@store.com"
+                />
+              </div>
+              <div class="form-field full-col">
+                <label>Address</label>
+                <input
+                  [(ngModel)]="company.address"
+                  class="form-input"
+                  placeholder="Street, City, Country"
+                />
+              </div>
+              <div class="form-field">
+                <label>Website</label>
+                <input
+                  [(ngModel)]="company.website"
+                  class="form-input"
+                  placeholder="https://mystore.com"
+                />
+              </div>
+            </div>
+
+            <div class="sc-section-title">Currency &amp; formatting</div>
+            <div class="form-grid three-col">
+              <div class="form-field">
+                <label>Currency code</label>
+                <select [(ngModel)]="company.currency" class="form-select">
+                  <option value="BHD">BHD — Bahraini Dinar</option>
+                  <option value="USD">USD — US Dollar</option>
+                  <option value="EUR">EUR — Euro</option>
+                  <option value="GBP">GBP — British Pound</option>
+                  <option value="SAR">SAR — Saudi Riyal</option>
+                  <option value="AED">AED — UAE Dirham</option>
+                  <option value="KWD">KWD — Kuwaiti Dinar</option>
+                  <option value="OMR">OMR — Omani Rial</option>
+                  <option value="QAR">QAR — Qatari Riyal</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Currency symbol</label>
+                <input
+                  [(ngModel)]="company.currencySymbol"
+                  class="form-input"
+                  placeholder="BD"
+                  maxlength="5"
+                />
+              </div>
+              <div class="form-field">
+                <label>Decimal places</label>
+                <select [(ngModel)]="company.decimalPlaces" class="form-select">
+                  <option value="0">0 — e.g. 100</option>
+                  <option value="2">2 — e.g. 100.00</option>
+                  <option value="3">3 — e.g. 100.000</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ════════════════════════════════════
+           RECEIPT
+      ════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'receipt'">
+        <div class="topbar">
+          <h2>Receipt settings</h2>
+          <button class="btn" (click)="resetSection('receipt')">Reset defaults</button>
+          <button
+            class="btn primary"
+            (click)="save()"
+            [disabled]="saving"
+            [class.success]="saveSuccess"
+          >
+            {{ saving ? 'Saving…' : saveSuccess ? '✓ Saved!' : 'Save changes' }}
+          </button>
+        </div>
+        <div class="content">
+          <div class="two-col-layout">
+            <div class="settings-card">
+              <div class="sc-section-title">Content</div>
+              <div class="form-grid one-col">
+                <div class="form-field">
+                  <label>Header text</label>
+                  <textarea
+                    [(ngModel)]="receipt.header"
+                    class="form-textarea"
+                    rows="3"
+                    placeholder="e.g. Welcome to My Store&#10;Opening hours: 9am–10pm"
+                  ></textarea>
+                </div>
+                <div class="form-field">
+                  <label>Footer text</label>
+                  <textarea
+                    [(ngModel)]="receipt.footer"
+                    class="form-textarea"
+                    rows="3"
+                    placeholder="e.g. Thank you for your visit!"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="sc-section-title">Options</div>
+              <div class="toggle-list">
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <strong>Show company logo</strong><span>Print logo on receipt header</span>
+                  </div>
+                  <label class="toggle-switch"
+                    ><input type="checkbox" [(ngModel)]="receipt.showLogo" /><span
+                      class="toggle-track"
+                      ><span class="toggle-thumb"></span></span
+                  ></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <strong>Show VAT details</strong><span>Display VAT amount and rate</span>
+                  </div>
+                  <label class="toggle-switch"
+                    ><input type="checkbox" [(ngModel)]="receipt.showVAT" /><span
+                      class="toggle-track"
+                      ><span class="toggle-thumb"></span></span
+                  ></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <strong>Show barcode</strong><span>Print sale barcode at bottom</span>
+                  </div>
+                  <label class="toggle-switch"
+                    ><input type="checkbox" [(ngModel)]="receipt.showBarcode" /><span
+                      class="toggle-track"
+                      ><span class="toggle-thumb"></span></span
+                  ></label>
+                </div>
+              </div>
+
+              <div class="sc-section-title">Printer</div>
+              <div class="form-grid two-col">
+                <div class="form-field">
+                  <label>Paper size</label>
+                  <select [(ngModel)]="receipt.paperSize" class="form-select">
+                    <option value="58mm">58mm thermal</option>
+                    <option value="80mm">80mm thermal</option>
+                    <option value="A4">A4 paper</option>
+                    <option value="A5">A5 paper</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label>Print copies</label>
+                  <select [(ngModel)]="receipt.copies" class="form-select">
+                    <option [ngValue]="1">1 copy</option>
+                    <option [ngValue]="2">2 copies</option>
+                    <option [ngValue]="3">3 copies</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live receipt preview -->
+            <div class="receipt-preview">
+              <div class="rp-label">Preview</div>
+              <div class="receipt-paper">
+                <div class="rp-logo" *ngIf="receipt.showLogo">
+                  <div class="rp-logo-box">LOGO</div>
+                </div>
+                <div class="rp-company">{{ company.name || 'My POS Store' }}</div>
+                <div class="rp-tagline" *ngIf="company.tagline">{{ company.tagline }}</div>
+                <div class="rp-contact" *ngIf="company.phone">{{ company.phone }}</div>
+                <div class="rp-header" *ngIf="receipt.header">{{ receipt.header }}</div>
+                <div class="rp-divider">- - - - - - - - - - - - - - - -</div>
+                <div class="rp-row">
+                  <span>Item 1</span><span>{{ company.currencySymbol }} 1.500</span>
+                </div>
+                <div class="rp-row">
+                  <span>Item 2</span><span>{{ company.currencySymbol }} 2.000</span>
+                </div>
+                <div class="rp-divider">- - - - - - - - - - - - - - - -</div>
+                <div class="rp-row">
+                  <span>Subtotal</span><span>{{ company.currencySymbol }} 3.500</span>
+                </div>
+                <div class="rp-row vat" *ngIf="receipt.showVAT">
+                  <span>{{ tax.vatLabel }} ({{ tax.vatRate }}%)</span
+                  ><span>{{ company.currencySymbol }} 0.350</span>
+                </div>
+                <div class="rp-row total">
+                  <span>TOTAL</span><span>{{ company.currencySymbol }} 3.850</span>
+                </div>
+                <div class="rp-divider">- - - - - - - - - - - - - - - -</div>
+                <div class="rp-footer" *ngIf="receipt.footer">{{ receipt.footer }}</div>
+                <div class="rp-barcode" *ngIf="receipt.showBarcode">||| || |||| ||| |||||</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ════════════════════════════════════
+           TAX & VAT
+      ════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'tax'">
+        <div class="topbar">
+          <h2>Tax &amp; VAT</h2>
+          <button class="btn" (click)="resetSection('tax')">Reset defaults</button>
+          <button
+            class="btn primary"
+            (click)="save()"
+            [disabled]="saving"
+            [class.success]="saveSuccess"
+          >
+            {{ saving ? 'Saving…' : saveSuccess ? '✓ Saved!' : 'Save changes' }}
+          </button>
+        </div>
+        <div class="content">
+          <div class="settings-card">
+            <div class="toggle-list">
+              <div class="toggle-row prominent">
+                <div class="toggle-info">
+                  <strong>Enable VAT</strong><span>Apply VAT to all sales transactions</span>
+                </div>
+                <label class="toggle-switch"
+                  ><input type="checkbox" [(ngModel)]="tax.vatEnabled" /><span class="toggle-track"
+                    ><span class="toggle-thumb"></span></span
+                ></label>
+              </div>
+            </div>
+
+            <div class="sc-section-title">VAT configuration</div>
+            <div class="form-grid three-col">
+              <div class="form-field">
+                <label>VAT rate (%)</label>
+                <input
+                  type="number"
+                  [(ngModel)]="tax.vatRate"
+                  class="form-input"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  [disabled]="!tax.vatEnabled"
+                />
+              </div>
+              <div class="form-field">
+                <label>VAT label on receipt</label>
+                <input
+                  [(ngModel)]="tax.vatLabel"
+                  class="form-input"
+                  placeholder="VAT"
+                  [disabled]="!tax.vatEnabled"
+                />
+              </div>
+              <div class="form-field">
+                <label>VAT registration number</label>
+                <input
+                  [(ngModel)]="tax.vatNumber"
+                  class="form-input"
+                  placeholder="VAT-000000"
+                  [disabled]="!tax.vatEnabled"
+                />
+              </div>
+            </div>
+
+            <div class="toggle-list" [class.disabled-block]="!tax.vatEnabled">
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <strong>Prices are VAT inclusive</strong
+                  ><span>Product prices already include VAT (VAT extracted on sale)</span>
+                </div>
+                <label class="toggle-switch"
+                  ><input
+                    type="checkbox"
+                    [(ngModel)]="tax.vatInclusive"
+                    [disabled]="!tax.vatEnabled" /><span class="toggle-track"
+                    ><span class="toggle-thumb"></span></span
+                ></label>
+              </div>
+            </div>
+
+            <div class="info-box" *ngIf="tax.vatEnabled">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span *ngIf="!tax.vatInclusive"
+                >VAT will be added on top of product prices. E.g. a
+                {{ company.currencySymbol }} 1.000 item becomes {{ company.currencySymbol }}
+                {{ (1 + tax.vatRate / 100).toFixed(3) }}.</span
+              >
+              <span *ngIf="tax.vatInclusive"
+                >VAT is extracted from product prices. E.g. a {{ company.currencySymbol }} 1.000
+                item has {{ company.currencySymbol }}
+                {{ (tax.vatRate / 100 / (1 + tax.vatRate / 100)).toFixed(3) }} VAT included.</span
+              >
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ════════════════════════════════════
+           POS & SALES
+      ════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'pos'">
+        <div class="topbar">
+          <h2>POS &amp; Sales</h2>
+          <button class="btn" (click)="resetSection('pos')">Reset defaults</button>
+          <button
+            class="btn primary"
+            (click)="save()"
+            [disabled]="saving"
+            [class.success]="saveSuccess"
+          >
+            {{ saving ? 'Saving…' : saveSuccess ? '✓ Saved!' : 'Save changes' }}
+          </button>
+        </div>
+        <div class="content">
+          <div class="settings-card">
+            <div class="sc-section-title">Discounts</div>
+            <div class="toggle-list">
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <strong>Allow discounts</strong
+                  ><span>Cashiers can apply item and sale discounts</span>
+                </div>
+                <label class="toggle-switch"
+                  ><input type="checkbox" [(ngModel)]="pos.allowDiscount" /><span
+                    class="toggle-track"
+                    ><span class="toggle-thumb"></span></span
+                ></label>
+              </div>
+            </div>
+            <div
+              class="form-grid two-col"
+              style="padding: 0 16px 16px"
+              [class.disabled-block]="!pos.allowDiscount"
+            >
+              <div class="form-field">
+                <label>Maximum discount (%)</label>
+                <input
+                  type="number"
+                  [(ngModel)]="pos.maxDiscountPct"
+                  class="form-input"
+                  min="0"
+                  max="100"
+                  [disabled]="!pos.allowDiscount"
+                />
+                <span class="field-hint">Set 100 to allow any discount amount</span>
+              </div>
+            </div>
+
+            <div class="sc-section-title">Refunds</div>
+            <div class="toggle-list">
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <strong>Allow refunds</strong
+                  ><span>Enable refund / return functionality at POS</span>
+                </div>
+                <label class="toggle-switch"
+                  ><input type="checkbox" [(ngModel)]="pos.allowRefund" /><span class="toggle-track"
+                    ><span class="toggle-thumb"></span></span
+                ></label>
+              </div>
+              <div class="toggle-row" [class.disabled-block]="!pos.allowRefund">
+                <div class="toggle-info">
+                  <strong>Require refund reason</strong
+                  ><span>Cashier must enter a reason before issuing refund</span>
+                </div>
+                <label class="toggle-switch"
+                  ><input
+                    type="checkbox"
+                    [(ngModel)]="pos.requireReason"
+                    [disabled]="!pos.allowRefund" /><span class="toggle-track"
+                    ><span class="toggle-thumb"></span></span
+                ></label>
+              </div>
+            </div>
+
+            <div class="sc-section-title">Payment</div>
+            <div class="form-grid two-col" style="padding: 0 16px 16px">
+              <div class="form-field">
+                <label>Default payment method</label>
+                <select [(ngModel)]="pos.defaultPayment" class="form-select">
+                  <option value="cash">Cash</option>
+                  <option value="card">Card</option>
+                  <option value="split">Split</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="sc-section-title">Loyalty programme</div>
+            <div class="toggle-list">
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <strong>Enable loyalty points</strong
+                  ><span>Customers earn points on every purchase</span>
+                </div>
+                <label class="toggle-switch"
+                  ><input type="checkbox" [(ngModel)]="pos.loyaltyEnabled" /><span
+                    class="toggle-track"
+                    ><span class="toggle-thumb"></span></span
+                ></label>
+              </div>
+            </div>
+            <div
+              class="form-grid two-col"
+              style="padding: 0 16px 16px"
+              [class.disabled-block]="!pos.loyaltyEnabled"
+            >
+              <div class="form-field">
+                <label>Points earned per {{ company.currencySymbol }} 1 spent</label>
+                <input
+                  type="number"
+                  [(ngModel)]="pos.loyaltyRate"
+                  class="form-input"
+                  min="0"
+                  step="1"
+                  [disabled]="!pos.loyaltyEnabled"
+                />
+                <span class="field-hint"
+                  >e.g. 1 = one point per {{ company.currencySymbol }} 1.000</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ════════════════════════════════════
+           INVENTORY
+      ════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'inventory'">
+        <div class="topbar">
+          <h2>Inventory settings</h2>
+          <button class="btn" (click)="resetSection('inventory')">Reset defaults</button>
+          <button
+            class="btn primary"
+            (click)="save()"
+            [disabled]="saving"
+            [class.success]="saveSuccess"
+          >
+            {{ saving ? 'Saving…' : saveSuccess ? '✓ Saved!' : 'Save changes' }}
+          </button>
+        </div>
+        <div class="content">
+          <div class="settings-card">
+            <div class="sc-section-title">Stock management</div>
+            <div class="toggle-list">
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <strong>Auto-deduct stock on sale</strong
+                  ><span>Reduce product stock quantity when a sale is completed</span>
+                </div>
+                <label class="toggle-switch"
+                  ><input type="checkbox" [(ngModel)]="inventory.autoDeductStock" /><span
+                    class="toggle-track"
+                    ><span class="toggle-thumb"></span></span
+                ></label>
+              </div>
+            </div>
+            <div class="form-grid two-col" style="padding: 0 16px 16px">
+              <div class="form-field">
+                <label>Default low stock threshold</label>
+                <input
+                  type="number"
+                  [(ngModel)]="inventory.lowStockDefault"
+                  class="form-input"
+                  min="0"
+                />
+                <span class="field-hint">Applied to new products automatically</span>
+              </div>
+            </div>
+
+            <div class="sc-section-title">Expiry tracking</div>
+            <div class="toggle-list">
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <strong>Track product expiry dates</strong
+                  ><span>Enable expiry date field and expiry alerts</span>
+                </div>
+                <label class="toggle-switch"
+                  ><input type="checkbox" [(ngModel)]="inventory.trackExpiry" /><span
+                    class="toggle-track"
+                    ><span class="toggle-thumb"></span></span
+                ></label>
+              </div>
+            </div>
+            <div
+              class="form-grid two-col"
+              style="padding: 0 16px 16px"
+              [class.disabled-block]="!inventory.trackExpiry"
+            >
+              <div class="form-field">
+                <label>Alert when expiring within (days)</label>
+                <input
+                  type="number"
+                  [(ngModel)]="inventory.expiryAlertDays"
+                  class="form-input"
+                  min="1"
+                  [disabled]="!inventory.trackExpiry"
+                />
+                <span class="field-hint"
+                  >Products expiring within this window appear in alerts</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ════════════════════════════════════
+           NOTIFICATIONS
+      ════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'notifications'">
+        <div class="topbar">
+          <h2>Notifications</h2>
+          <button class="btn" (click)="resetSection('notify')">Reset defaults</button>
+          <button
+            class="btn primary"
+            (click)="save()"
+            [disabled]="saving"
+            [class.success]="saveSuccess"
+          >
+            {{ saving ? 'Saving…' : saveSuccess ? '✓ Saved!' : 'Save changes' }}
+          </button>
+        </div>
+        <div class="content">
+          <div class="settings-card">
+            <div class="sc-section-title">Alert types</div>
+            <div class="toggle-list">
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <strong>Low stock alerts</strong>
+                  <span>Notify when a product's stock drops below its threshold</span>
+                </div>
+                <label class="toggle-switch"
+                  ><input type="checkbox" [(ngModel)]="notify.lowStock" /><span class="toggle-track"
+                    ><span class="toggle-thumb"></span></span
+                ></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <strong>Expiry alerts</strong>
+                  <span>Notify when products are approaching their expiry date</span>
+                </div>
+                <label class="toggle-switch"
+                  ><input type="checkbox" [(ngModel)]="notify.expiry" /><span class="toggle-track"
+                    ><span class="toggle-thumb"></span></span
+                ></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <strong>Delivery / cashier alerts</strong>
+                  <span>Notify about incoming deliveries and cashier status changes</span>
+                </div>
+                <label class="toggle-switch"
+                  ><input type="checkbox" [(ngModel)]="notify.delivery" /><span class="toggle-track"
+                    ><span class="toggle-thumb"></span></span
+                ></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <strong>Sound alerts</strong>
+                  <span>Play a sound when new notifications arrive</span>
+                </div>
+                <label class="toggle-switch"
+                  ><input type="checkbox" [(ngModel)]="notify.sound" /><span class="toggle-track"
+                    ><span class="toggle-thumb"></span></span
+                ></label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ════════════════════════════════════
+           USERS
+      ════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'users'">
+        <div class="topbar">
+          <h2>User management</h2>
+          <button class="btn primary" (click)="openAddUser()">+ Add user</button>
+        </div>
+        <div class="content">
+          <!-- User form -->
+          <div class="settings-card" *ngIf="showUserForm" style="margin-bottom: 14px">
+            <div class="sc-form-head">
+              <h3>{{ userFormMode === 'add' ? 'New user' : 'Edit user' }}</h3>
+              <button class="btn-icon" (click)="showUserForm = false">✕</button>
+            </div>
+            <div class="form-grid three-col">
+              <div class="form-field">
+                <label>Full name <span class="req">*</span></label>
+                <input [(ngModel)]="userForm.name" class="form-input" placeholder="John Doe" />
+              </div>
+              <div class="form-field">
+                <label>Username <span class="req">*</span></label>
+                <input
+                  [(ngModel)]="userForm.username"
+                  class="form-input"
+                  placeholder="john.doe"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="form-field">
+                <label>Role</label>
+                <select [(ngModel)]="userForm.role" class="form-select">
+                  <option value="admin">Admin</option>
+                  <option value="manager">Manager</option>
+                  <option value="cashier">Cashier</option>
+                  <option value="viewer">Viewer</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>{{
+                  userFormMode === 'edit' ? 'New password (leave blank to keep)' : 'Password *'
+                }}</label>
+                <div class="pw-field">
+                  <input
+                    [(ngModel)]="userForm.password"
+                    [type]="showPassword ? 'text' : 'password'"
+                    class="form-input"
+                    placeholder="••••••••"
+                    autocomplete="new-password"
+                  />
+                  <button class="pw-toggle" (click)="showPassword = !showPassword" type="button">
+                    {{ showPassword ? 'Hide' : 'Show' }}
+                  </button>
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Branch</label>
+                <select [(ngModel)]="userForm.branchId" class="form-select">
+                  <option [ngValue]="null">All branches</option>
+                  <option *ngFor="let b of branches" [ngValue]="b.Id">{{ b.Name }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-footer">
+              <span class="form-error" *ngIf="userError">{{ userError }}</span>
+              <button class="btn" (click)="showUserForm = false">Cancel</button>
+              <button
+                class="btn primary"
+                (click)="saveUser()"
+                [disabled]="userSaving"
+                [class.success]="userSuccess"
+              >
+                {{
+                  userSaving
+                    ? 'Saving…'
+                    : userSuccess
+                      ? '✓ Saved!'
+                      : userFormMode === 'add'
+                        ? 'Create user'
+                        : 'Update user'
+                }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Users table -->
+          <div class="settings-card">
+            <div class="empty-state" *ngIf="users.length === 0">No users yet</div>
+            <table class="table" *ngIf="users.length > 0">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Username</th>
+                  <th>Role</th>
+                  <th>Branch</th>
+                  <th>Created</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let u of users">
+                  <td>
+                    <div class="user-cell">
+                      <div class="avatar" [style.background]="avatarColor(u.Name)">
+                        {{ initials(u.Name) }}
+                      </div>
+                      <span class="td-name">{{ u.Name }}</span>
+                    </div>
+                  </td>
+                  <td class="td-muted">{{ u.Username }}</td>
+                  <td>
+                    <span class="role-badge" [ngClass]="roleClass(u.Role)">{{
+                      roleLabel(u.Role)
+                    }}</span>
+                  </td>
+                  <td class="td-muted">
+                    {{ u.BranchId ? 'Branch ' + u.BranchId : 'All branches' }}
+                  </td>
+                  <td class="td-muted">{{ u.CreatedAt | date: 'dd MMM yyyy' }}</td>
+                  <td>
+                    <div class="action-btns">
+                      <button class="btn-sm" (click)="openEditUser(u)">Edit</button>
+                      <button class="btn-sm red" (click)="deleteUser(u)">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ════════════════════════════════════
+           BRANCHES
+      ════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'branches'">
+        <div class="topbar">
+          <h2>Branch management</h2>
+          <button class="btn primary" (click)="openAddBranch()">+ Add branch</button>
+        </div>
+        <div class="content">
+          <!-- Branch form -->
+          <div class="settings-card" *ngIf="showBranchForm" style="margin-bottom: 14px">
+            <div class="sc-form-head">
+              <h3>{{ branchFormMode === 'add' ? 'New branch' : 'Edit branch' }}</h3>
+              <button class="btn-icon" (click)="showBranchForm = false">✕</button>
+            </div>
+            <div class="form-grid two-col">
+              <div class="form-field">
+                <label>Branch name <span class="req">*</span></label>
+                <input
+                  [(ngModel)]="branchForm.name"
+                  class="form-input"
+                  placeholder="e.g. Main Branch"
+                />
+              </div>
+              <div class="form-field">
+                <label>Location</label>
+                <input
+                  [(ngModel)]="branchForm.location"
+                  class="form-input"
+                  placeholder="e.g. Manama, Building 10"
+                />
+              </div>
+            </div>
+            <div class="form-footer">
+              <span class="form-error" *ngIf="branchError">{{ branchError }}</span>
+              <button class="btn" (click)="showBranchForm = false">Cancel</button>
+              <button
+                class="btn primary"
+                (click)="saveBranch()"
+                [disabled]="branchSaving"
+                [class.success]="branchSuccess"
+              >
+                {{
+                  branchSaving
+                    ? 'Saving…'
+                    : branchSuccess
+                      ? '✓ Saved!'
+                      : branchFormMode === 'add'
+                        ? 'Create branch'
+                        : 'Update branch'
+                }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Branches list -->
+          <div class="settings-card">
+            <div class="empty-state" *ngIf="branches.length === 0">No branches yet</div>
+            <table class="table" *ngIf="branches.length > 0">
+              <thead>
+                <tr>
+                  <th>Branch name</th>
+                  <th>Location</th>
+                  <th>Created</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let b of branches">
+                  <td class="td-name">{{ b.Name }}</td>
+                  <td class="td-muted">{{ b.Location ?? '—' }}</td>
+                  <td class="td-muted">{{ b.CreatedAt | date: 'dd MMM yyyy' }}</td>
+                  <td>
+                    <div class="action-btns">
+                      <button class="btn-sm" (click)="openEditBranch(b)">Edit</button>
+                      <button class="btn-sm red" (click)="deleteBranch(b)">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ════════════════════════════════════
+           ABOUT
+      ════════════════════════════════════ -->
+      <ng-container *ngIf="view === 'about'">
+        <div class="topbar"><h2>About</h2></div>
+        <div class="content">
+          <div class="about-hero">
+            <div class="about-icon">
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <line x1="8" y1="21" x2="16" y2="21" />
+                <line x1="12" y1="17" x2="12" y2="21" />
+              </svg>
+            </div>
+            <div class="about-title">
+              <h2>{{ appInfo?.name ?? 'POS System' }}</h2>
+              <span class="version-badge">v{{ appInfo?.version ?? '—' }}</span>
+            </div>
+          </div>
+
+          <div class="two-col-info">
+            <div class="settings-card">
+              <div class="sc-section-title">System information</div>
+              <div class="info-list">
+                <div class="info-row">
+                  <span class="info-lbl">Platform</span
+                  ><span class="info-val">{{ platformLabel(appInfo?.platform ?? '') }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-lbl">Architecture</span
+                  ><span class="info-val">{{ appInfo?.arch ?? '—' }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-lbl">Electron</span
+                  ><span class="info-val">{{ appInfo?.electron ?? '—' }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-lbl">Node.js</span
+                  ><span class="info-val">{{ appInfo?.node ?? '—' }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="settings-card">
+              <div class="sc-section-title">Storage</div>
+              <div class="info-list">
+                <div class="info-row">
+                  <span class="info-lbl">App data folder</span
+                  ><span class="info-val code-small">{{ appInfo?.userData ?? '—' }}</span>
+                </div>
+              </div>
+              <div class="sc-section-title" style="margin-top: 8px">Company</div>
+              <div class="info-list">
+                <div class="info-row">
+                  <span class="info-lbl">Name</span><span class="info-val">{{ company.name }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-lbl">Currency</span
+                  ><span class="info-val"
+                    >{{ company.currency }} ({{ company.currencySymbol }})</span
+                  >
+                </div>
+                <div class="info-row">
+                  <span class="info-lbl">VAT</span
+                  ><span class="info-val">{{
+                    tax.vatEnabled ? 'Enabled — ' + tax.vatRate + '%' : 'Disabled'
+                  }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </main>
+  </div>
+</div>

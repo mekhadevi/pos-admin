@@ -1,0 +1,877 @@
+<!-- inventory.html -->
+<div class="inv-page" [style.background-image]="'url(bg.png)'">
+  <app-header pageTitle="Inventory" />
+
+  <div class="inv-body">
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="sidebar">
+      <nav>
+        <div class="nav-section">Overview</div>
+        <div class="nav-item" [class.active]="view === 'overview'" (click)="setView('overview')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+          </svg>
+          Overview
+        </div>
+
+        <div class="nav-section">Stock</div>
+        <div class="nav-item" [class.active]="view === 'stock'" (click)="setView('stock')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"
+            />
+          </svg>
+          Stock levels
+        </div>
+        <div
+          class="nav-item"
+          [class.active]="view === 'adjustments'"
+          (click)="setView('adjustments')"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          Adjustments
+        </div>
+        <div class="nav-item" [class.active]="view === 'low-stock'" (click)="setView('low-stock')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+            />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          Low stock alerts
+          <span class="nav-badge red" *ngIf="stats.lowStock > 0">{{ stats.lowStock }}</span>
+        </div>
+
+        <div class="nav-section">Orders</div>
+        <div class="nav-item" [class.active]="view === 'po'" (click)="setView('po')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+          Purchase orders
+          <span class="nav-badge amber" *ngIf="purchaseOrders | pendingCount">{{
+            purchaseOrders | pendingCount
+          }}</span>
+        </div>
+
+        <div class="nav-section">Tracking</div>
+        <div class="nav-item" [class.active]="view === 'expiry'" (click)="setView('expiry')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          Expiry tracking
+          <span class="nav-badge red" *ngIf="stats.expiringCount > 0">{{
+            stats.expiringCount
+          }}</span>
+        </div>
+        <div class="nav-item" [class.active]="view === 'movements'" (click)="setView('movements')">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+            <polyline points="17 6 23 6 23 12" />
+          </svg>
+          Movements
+        </div>
+      </nav>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <main class="inv-main">
+      <!-- ── OVERVIEW ── -->
+      <ng-container *ngIf="view === 'overview'">
+        <div class="topbar">
+          <h2>Inventory overview</h2>
+          <button class="btn primary" (click)="setView('po'); showPoForm = true">
+            + New purchase order
+          </button>
+        </div>
+        <div class="content">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon si-blue">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path
+                    d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"
+                  />
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Total products</span>
+                <span class="stat-val">{{ stats.total }}</span>
+                <span class="stat-sub">{{ stats.categories }} categories</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-amber">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path
+                    d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+                  />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Low stock</span>
+                <span class="stat-val red">{{ stats.lowStock }}</span>
+                <span class="stat-sub">Below threshold</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-red">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Out of stock</span>
+                <span class="stat-val red">{{ stats.outOfStock }}</span>
+                <span class="stat-sub">Needs reorder</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-purple">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Expiring soon</span>
+                <span class="stat-val red">{{ stats.expiringCount }}</span>
+                <span class="stat-sub">Within 7 days</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="card">
+              <div class="card-head">
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#dc2626"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+                  />
+                </svg>
+                <h3>Low stock alerts</h3>
+                <span class="nbadge red">{{ lowStockProducts.length }}</span>
+              </div>
+              <div class="empty-state" *ngIf="lowStockProducts.length === 0">
+                All products are sufficiently stocked
+              </div>
+              <table class="table" *ngIf="lowStockProducts.length > 0">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Threshold</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let p of lowStockProducts | slice: 0 : 6">
+                    <td>{{ p.Name }}</td>
+                    <td>
+                      <span
+                        class="pill"
+                        [ngClass]="stockStatus(p) === 'out' ? 'pill-out' : 'pill-low'"
+                        >{{ p.StockQty }}</span
+                      >
+                    </td>
+                    <td>{{ p.LowStockThreshold }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#dc2626"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                <h3>Expiring soon</h3>
+                <span class="nbadge red">{{ expiryProducts.length }}</span>
+              </div>
+              <div class="empty-state" *ngIf="expiryProducts.length === 0">
+                No products expiring within 7 days
+              </div>
+              <div class="exp-row" *ngFor="let p of expiryProducts | slice: 0 : 6">
+                <div
+                  class="exp-dot"
+                  [style.background]="
+                    p.DaysLeft === 0 ? '#E24B4A' : p.DaysLeft <= 3 ? '#EF9F27' : '#97C459'
+                  "
+                ></div>
+                <div class="exp-info">
+                  <p>{{ p.Name }}</p>
+                  <span
+                    >Exp: {{ p.ExpiryDate | date: 'dd MMM yyyy' }} · {{ p.StockQty }} units</span
+                  >
+                </div>
+                <span class="days-pill" [ngClass]="expiryClass(p.DaysLeft)">{{
+                  expiryLabel(p.DaysLeft)
+                }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#185FA5"
+                stroke-width="2"
+              >
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+              </svg>
+              <h3>Recent purchase orders</h3>
+              <button class="btn-sm" (click)="setView('po')">View all</button>
+            </div>
+            <div class="empty-state" *ngIf="purchaseOrders.length === 0">
+              No purchase orders yet
+            </div>
+            <div class="po-row" *ngFor="let po of purchaseOrders | slice: 0 : 4">
+              <div class="po-info">
+                <p>{{ po.PoNumber }} — {{ po.SupplierName }}</p>
+                <span>{{ po.CreatedAt | date: 'dd MMM yyyy' }} · {{ po.ItemCount }} items</span>
+              </div>
+              <span class="po-total">{{ bd(po.TotalAmount) }}</span>
+              <span
+                class="pill"
+                [ngClass]="
+                  po.Status === 'received'
+                    ? 'pill-ok'
+                    : po.Status === 'pending'
+                      ? 'pill-pending'
+                      : 'pill-draft'
+                "
+                >{{ po.Status }}</span
+              >
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── STOCK LEVELS ── -->
+      <ng-container *ngIf="view === 'stock'">
+        <div class="topbar">
+          <h2>Stock levels</h2>
+          <button class="btn" (click)="setView('adjustments')">Adjust stock</button>
+          <button class="btn primary" (click)="setView('po'); showPoForm = true">
+            New purchase order
+          </button>
+        </div>
+        <div class="content">
+          <div class="filter-row">
+            <input
+              [(ngModel)]="stockSearch"
+              (ngModelChange)="filterProducts()"
+              placeholder="Search products…"
+              class="search-input"
+            />
+            <select
+              [(ngModel)]="stockCategoryFilter"
+              (ngModelChange)="filterProducts()"
+              class="filter-select"
+            >
+              <option value="">All categories</option>
+              <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+            </select>
+            <select
+              [(ngModel)]="stockStatusFilter"
+              (ngModelChange)="filterProducts()"
+              class="filter-select"
+            >
+              <option value="">All statuses</option>
+              <option value="ok">In stock</option>
+              <option value="low">Low stock</option>
+              <option value="out">Out of stock</option>
+            </select>
+          </div>
+          <div class="card">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Stock qty</th>
+                  <th>Level</th>
+                  <th>Threshold</th>
+                  <th>Status</th>
+                  <th>Expiry</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let p of filteredProducts">
+                  <td class="td-name">{{ p.Name }}</td>
+                  <td>{{ p.CategoryName }}</td>
+                  <td>{{ p.StockQty }}</td>
+                  <td>
+                    <div class="stock-bar-wrap">
+                      <div
+                        class="stock-bar"
+                        [style.width.%]="stockBarWidth(p)"
+                        [style.background]="stockBarColor(p)"
+                      ></div>
+                    </div>
+                  </td>
+                  <td>{{ p.LowStockThreshold }}</td>
+                  <td>
+                    <span
+                      class="pill"
+                      [ngClass]="{
+                        'pill-ok': stockStatus(p) === 'ok',
+                        'pill-low': stockStatus(p) === 'low',
+                        'pill-out': stockStatus(p) === 'out',
+                      }"
+                    >
+                      {{
+                        stockStatus(p) === 'ok'
+                          ? 'In stock'
+                          : stockStatus(p) === 'low'
+                            ? 'Low'
+                            : 'Out'
+                      }}
+                    </span>
+                  </td>
+                  <td
+                    [class.exp-today]="p.ExpiryDate && daysUntil(p.ExpiryDate) <= 0"
+                    [class.exp-soon]="
+                      p.ExpiryDate && daysUntil(p.ExpiryDate) > 0 && daysUntil(p.ExpiryDate) <= 3
+                    "
+                  >
+                    {{ p.ExpiryDate ? (p.ExpiryDate | date: 'dd MMM') : '—' }}
+                  </td>
+                </tr>
+                <tr *ngIf="filteredProducts.length === 0">
+                  <td colspan="7" class="td-empty">No products match your filters</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── ADJUSTMENTS ── -->
+      <ng-container *ngIf="view === 'adjustments'">
+        <div class="topbar"><h2>Stock adjustments</h2></div>
+        <div class="content">
+          <div class="card" style="margin-bottom: 12px">
+            <div class="card-head"><h3>New adjustment</h3></div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Product</label>
+                <select [(ngModel)]="adjForm.productId" class="form-select">
+                  <option [ngValue]="null">Select product…</option>
+                  <option *ngFor="let p of products" [ngValue]="p.Id">
+                    {{ p.Name }} ({{ p.StockQty }} in stock)
+                  </option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Type</label>
+                <select [(ngModel)]="adjForm.type" class="form-select">
+                  <option value="add">Add stock</option>
+                  <option value="remove">Remove stock</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Quantity</label>
+                <input
+                  type="number"
+                  [(ngModel)]="adjForm.qty"
+                  min="1"
+                  class="form-input"
+                  placeholder="0"
+                />
+              </div>
+              <div class="form-field">
+                <label>Reason</label>
+                <select [(ngModel)]="adjForm.reason" class="form-select">
+                  <option>Stock count correction</option>
+                  <option>Damaged goods</option>
+                  <option>Expired removal</option>
+                  <option>Found stock</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="form-field full-width">
+                <label>Note (optional)</label>
+                <input [(ngModel)]="adjForm.note" class="form-input" placeholder="Add a note…" />
+              </div>
+              <div class="form-field full-width form-actions">
+                <button
+                  class="btn primary"
+                  (click)="saveAdjustment()"
+                  [disabled]="!adjForm.productId || !adjForm.qty || adjSaving"
+                  [class.success]="adjSuccess"
+                >
+                  {{ adjSaving ? 'Saving…' : adjSuccess ? '✓ Saved!' : 'Save adjustment' }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Recent adjustments</h3></div>
+            <div class="empty-state" *ngIf="recentAdjustments.length === 0">No adjustments yet</div>
+            <table class="table" *ngIf="recentAdjustments.length > 0">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Type</th>
+                  <th>Qty change</th>
+                  <th>Reason</th>
+                  <th>By</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let m of recentAdjustments">
+                  <td>{{ m.ProductName }}</td>
+                  <td><span class="type-pill adj">Adjustment</span></td>
+                  <td [class.qty-pos]="m.Qty > 0" [class.qty-neg]="m.Qty < 0">
+                    {{ m.Qty > 0 ? '+' : '' }}{{ m.Qty }}
+                  </td>
+                  <td>{{ m.Note }}</td>
+                  <td>{{ m.CreatedBy }}</td>
+                  <td>{{ m.CreatedAt | date: 'dd MMM HH:mm' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── PURCHASE ORDERS ── -->
+      <ng-container *ngIf="view === 'po'">
+        <div class="topbar">
+          <h2>Purchase orders</h2>
+          <button class="btn primary" (click)="showPoForm = !showPoForm">
+            {{ showPoForm ? 'Cancel' : '+ New purchase order' }}
+          </button>
+        </div>
+        <div class="content">
+          <div class="card" *ngIf="showPoForm" style="margin-bottom: 12px">
+            <div class="card-head"><h3>New purchase order</h3></div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Supplier</label>
+                <select [(ngModel)]="poForm.supplierId" class="form-select">
+                  <option [ngValue]="null">Select supplier…</option>
+                  <option *ngFor="let s of suppliers" [ngValue]="s.Id">{{ s.Name }}</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Invoice number</label>
+                <input
+                  [(ngModel)]="poForm.invoiceNumber"
+                  class="form-input"
+                  placeholder="INV-2024-…"
+                />
+              </div>
+              <div class="form-field">
+                <label>Expected delivery</label>
+                <input type="date" [(ngModel)]="poForm.expectedDate" class="form-input" />
+              </div>
+              <div class="form-field full-width">
+                <label>Notes</label>
+                <input
+                  [(ngModel)]="poForm.notes"
+                  class="form-input"
+                  placeholder="Optional notes…"
+                />
+              </div>
+            </div>
+            <div style="padding: 0 16px 10px">
+              <div class="section-label">Order items</div>
+              <table class="table" style="margin-bottom: 8px">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Unit cost (BD)</th>
+                    <th>Total</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of poItems; let i = index">
+                    <td>
+                      <select
+                        [(ngModel)]="item.productId"
+                        (ngModelChange)="onPoProductChange(i)"
+                        class="form-select"
+                        style="min-width: 160px"
+                      >
+                        <option [ngValue]="null">Select product…</option>
+                        <option *ngFor="let p of products" [ngValue]="p.Id">{{ p.Name }}</option>
+                      </select>
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        [(ngModel)]="item.qty"
+                        min="1"
+                        class="form-input"
+                        style="width: 70px"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        [(ngModel)]="item.unitCost"
+                        step="0.001"
+                        class="form-input"
+                        style="width: 90px"
+                      />
+                    </td>
+                    <td class="td-name">{{ bd(item.qty * item.unitCost) }}</td>
+                    <td><button class="del-btn" (click)="removePoItem(i)">✕</button></td>
+                  </tr>
+                </tbody>
+              </table>
+              <button class="btn" (click)="addPoItem()">+ Add item</button>
+            </div>
+            <div class="po-footer">
+              <div class="po-total-label">
+                Total: <span>{{ bd(poTotal) }}</span>
+              </div>
+              <div style="display: flex; gap: 8px">
+                <button class="btn" (click)="submitPo('draft')" [disabled]="poSaving">
+                  Save draft
+                </button>
+                <button
+                  class="btn primary"
+                  (click)="submitPo('pending')"
+                  [disabled]="!poForm.supplierId || poSaving"
+                >
+                  {{ poSaving ? 'Submitting…' : 'Submit order' }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Order history</h3></div>
+            <div class="empty-state" *ngIf="purchaseOrders.length === 0">
+              No purchase orders yet
+            </div>
+            <table class="table" *ngIf="purchaseOrders.length > 0">
+              <thead>
+                <tr>
+                  <th>PO number</th>
+                  <th>Supplier</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let po of purchaseOrders">
+                  <td class="td-po">{{ po.PoNumber }}</td>
+                  <td>{{ po.SupplierName }}</td>
+                  <td>{{ po.ItemCount }}</td>
+                  <td>{{ bd(po.TotalAmount) }}</td>
+                  <td>{{ po.CreatedAt | date: 'dd MMM yyyy' }}</td>
+                  <td>
+                    <span
+                      class="pill"
+                      [ngClass]="{
+                        'pill-ok': po.Status === 'received',
+                        'pill-pending': po.Status === 'pending',
+                        'pill-draft': po.Status === 'draft',
+                      }"
+                      >{{ po.Status }}</span
+                    >
+                  </td>
+                  <td>
+                    <button
+                      class="btn-sm green"
+                      *ngIf="po.Status === 'pending'"
+                      (click)="receivePo(po.Id)"
+                    >
+                      Mark received
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── EXPIRY TRACKING ── -->
+      <ng-container *ngIf="view === 'expiry'">
+        <div class="topbar">
+          <h2>Expiry tracking</h2>
+          <select
+            [(ngModel)]="expiryFilter"
+            (ngModelChange)="onExpiryFilterChange()"
+            class="filter-select"
+          >
+            <option value="7">Expiring within 7 days</option>
+            <option value="30">Expiring within 30 days</option>
+            <option value="90">Expiring within 90 days</option>
+          </select>
+        </div>
+        <div class="content">
+          <div class="stats-grid three-col">
+            <div class="stat-card">
+              <div class="stat-icon si-red">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Expires today</span
+                ><span class="stat-val red">{{ expToday }}</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-amber">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Expires in 1–3 days</span
+                ><span class="stat-val amber">{{ exp1to3 }}</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-green">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <span class="stat-label">Expires in 4–7 days</span
+                ><span class="stat-val green">{{ exp4to7 }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="empty-state" *ngIf="expiryProducts.length === 0">
+              No products expiring within this period
+            </div>
+            <table class="table" *ngIf="expiryProducts.length > 0">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Stock qty</th>
+                  <th>Expiry date</th>
+                  <th>Days left</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let p of expiryProducts">
+                  <td class="td-name">{{ p.Name }}</td>
+                  <td>{{ p.CategoryName }}</td>
+                  <td>{{ p.StockQty }}</td>
+                  <td>{{ p.ExpiryDate | date: 'dd MMM yyyy' }}</td>
+                  <td>
+                    <span class="days-pill" [ngClass]="expiryClass(p.DaysLeft)">{{
+                      expiryLabel(p.DaysLeft)
+                    }}</span>
+                  </td>
+                  <td>
+                    <button class="btn-sm" (click)="setView('adjustments')">Adjust stock</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── MOVEMENTS ── -->
+      <ng-container *ngIf="view === 'movements'">
+        <div class="topbar">
+          <h2>Stock movements</h2>
+          <select
+            [(ngModel)]="movementTypeFilter"
+            (ngModelChange)="onMovementFilterChange()"
+            class="filter-select"
+          >
+            <option value="">All types</option>
+            <option value="Sale">Sale</option>
+            <option value="Purchase">Purchase</option>
+            <option value="Adjustment">Adjustment</option>
+            <option value="Return">Return</option>
+          </select>
+          <button class="btn" (click)="exportMovements()">Export CSV</button>
+        </div>
+        <div class="content">
+          <div class="card">
+            <div class="empty-state" *ngIf="movements.length === 0">No movements found</div>
+            <table class="table" *ngIf="movements.length > 0">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Product</th>
+                  <th>Type</th>
+                  <th>Qty</th>
+                  <th>Stock after</th>
+                  <th>Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let m of movements">
+                  <td class="td-muted">{{ m.CreatedAt | date: 'dd MMM HH:mm' }}</td>
+                  <td>{{ m.ProductName }}</td>
+                  <td>
+                    <span
+                      class="type-pill"
+                      [ngClass]="{
+                        sale: m.Type === 'Sale',
+                        purchase: m.Type === 'Purchase',
+                        adj: m.Type === 'Adjustment',
+                        ret: m.Type === 'Return',
+                      }"
+                      >{{ m.Type }}</span
+                    >
+                  </td>
+                  <td [class.qty-pos]="m.Qty > 0" [class.qty-neg]="m.Qty < 0">
+                    {{ m.Qty > 0 ? '+' : '' }}{{ m.Qty }}
+                  </td>
+                  <td>{{ m.StockAfter }}</td>
+                  <td class="td-muted">{{ m.Note }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── LOW STOCK ── -->
+      <ng-container *ngIf="view === 'low-stock'">
+        <div class="topbar">
+          <h2>Low stock alerts</h2>
+          <button class="btn primary" (click)="setView('po'); showPoForm = true">
+            Create purchase order
+          </button>
+        </div>
+        <div class="content">
+          <div class="card">
+            <div class="empty-state" *ngIf="lowStockProducts.length === 0">
+              All products are sufficiently stocked 🎉
+            </div>
+            <table class="table" *ngIf="lowStockProducts.length > 0">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Current qty</th>
+                  <th>Threshold</th>
+                  <th>Shortage</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let p of lowStockProducts">
+                  <td class="td-name">{{ p.Name }}</td>
+                  <td>{{ p.CategoryName }}</td>
+                  <td>{{ p.StockQty }}</td>
+                  <td>{{ p.LowStockThreshold }}</td>
+                  <td class="qty-neg">-{{ shortage(p) }}</td>
+                  <td>
+                    <span class="pill" [ngClass]="p.StockQty <= 0 ? 'pill-out' : 'pill-low'">{{
+                      p.StockQty <= 0 ? 'Out of stock' : 'Low'
+                    }}</span>
+                  </td>
+                  <td>
+                    <button class="btn-sm primary" (click)="setView('po'); showPoForm = true">
+                      Order now
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+    </main>
+  </div>
+</div>

@@ -41,15 +41,15 @@ export class Dashboard implements OnInit, OnDestroy {
   private subs: Subscription[] = [];
 
   readonly menuItems = [
-    { label: 'Checkout', route: 'checkout' },
+    { label: 'POS', route: 'pos' },
     { label: 'Products', route: 'products' },
     { label: 'Inventory', route: 'inventory' },
     { label: 'Reports', route: 'reports' },
     { label: 'Customers', route: 'customers' },
     { label: 'Suppliers', route: 'suppliers' },
-    { label: 'Promotions', route: 'promotions' },
-    { label: 'Expiry', route: 'expiry' },
-    { label: 'Cash Drawer', route: 'cash' },
+    // { label: 'Promotions', route: 'promotions' },
+    // { label: 'Expiry', route: 'expiry' },
+    // { label: 'Cash Drawer', route: 'cash' },
     { label: 'Receipts', route: 'receipts' },
     { label: 'Backup', route: 'backup' },
     { label: 'Settings', route: 'settings' },
@@ -73,7 +73,6 @@ export class Dashboard implements OnInit, OnDestroy {
     }
 
     this.updateTime();
-
     this.subs.push(
       interval(1000).subscribe(() => {
         this.updateTime();
@@ -81,9 +80,52 @@ export class Dashboard implements OnInit, OnDestroy {
       }),
       interval(600_000).subscribe(() => this.getWeather()),
     );
-
     this.getWeather();
+
+    // Register listeners FIRST so we don't miss the trigger below
     this.registerElectronListeners();
+
+    // Then load current alerts directly from DB into the notification panel
+    await this.loadInitialNotifications();
+
+    // Then trigger a fresh check for anything new
+    (window as any).electronAPI.triggerNotificationCheck?.();
+  }
+
+  private async loadInitialNotifications() {
+    const api = (window as any).electronAPI;
+    const companyId = this.session?.company?.id;
+    if (!companyId) return;
+
+    try {
+      // Load low stock items
+      const lowStockItems = await api.getLowStock(companyId);
+      for (const item of lowStockItems) {
+        this.push({
+          type: 'stock',
+          title: `Low stock: ${item.Name}`,
+          subtitle: `${item.StockQty} / ${item.LowStockThreshold} units · ${item.CategoryName ?? 'Uncategorized'}`,
+        });
+      }
+
+      // Load expiring items
+      const expiringItems = await api.getExpiring(companyId);
+      for (const item of expiringItems) {
+        const label =
+          item.DaysLeft === 0
+            ? 'Expires today'
+            : `Expires in ${item.DaysLeft} day${item.DaysLeft > 1 ? 's' : ''}`;
+        this.push({
+          type: 'expiry',
+          title: `Expiry alert: ${item.Name}`,
+          subtitle: `${label} · ${item.StockQty} units`,
+        });
+      }
+
+      this.cdr.detectChanges();
+    } catch (err) {
+      console.error('loadInitialNotifications error:', err);
+    }
   }
 
   private registerElectronListeners() {
@@ -96,27 +138,33 @@ export class Dashboard implements OnInit, OnDestroy {
       });
     });
 
-    api.onLowStock?.((item: { name: string; remaining: number; aisle: string }) => {
-      this.zone.run(() => {
-        this.push({
-          type: 'stock',
-          title: `Low stock: ${item.name}`,
-          subtitle: `${item.remaining} units left · ${item.aisle}`,
+    // FIX: payload now uses `category` (not `aisle`) matching what the service sends
+    api.onLowStock?.(
+      (item: { name: string; remaining: number; threshold: number; category: string }) => {
+        this.zone.run(() => {
+          this.push({
+            type: 'stock',
+            title: `Low stock: ${item.name}`,
+            subtitle: `${item.remaining} / ${item.threshold} units · ${item.category}`,
+          });
+          this.cdr.detectChanges();
         });
-        this.cdr.detectChanges();
-      });
-    });
+      },
+    );
 
-    api.onExpiryAlert?.((item: { name: string; count: number }) => {
-      this.zone.run(() => {
-        this.push({
-          type: 'expiry',
-          title: `Expiry alert: ${item.name}`,
-          subtitle: `Expires today · ${item.count} units`,
+    // FIX: use `item.label` from the service payload instead of hardcoding "Expires today"
+    api.onExpiryAlert?.(
+      (item: { name: string; count: number; daysLeft: number; label: string }) => {
+        this.zone.run(() => {
+          this.push({
+            type: 'expiry',
+            title: `Expiry alert: ${item.name}`,
+            subtitle: `${item.label} · ${item.count} units`,
+          });
+          this.cdr.detectChanges();
         });
-        this.cdr.detectChanges();
-      });
-    });
+      },
+    );
 
     api.onDeliveryArrived?.((d: { category: string; boxes: number }) => {
       this.zone.run(() => {
@@ -140,12 +188,18 @@ export class Dashboard implements OnInit, OnDestroy {
       });
     });
 
-    api.onCashierStatus?.((d: { register: number; message: string }) => {
-      this.zone.run(() => {
-        this.push({ type: 'cashier', title: `Register ${d.register}: ${d.message}`, subtitle: '' });
-        this.cdr.detectChanges();
-      });
-    });
+    api.onCashierStatus?.(
+      (d: { register: number; cashier: string; message: string; status: string }) => {
+        this.zone.run(() => {
+          this.push({
+            type: 'cashier',
+            title: `Register ${d.register}: ${d.message}`,
+            subtitle: d.cashier !== 'Unknown' ? `Cashier: ${d.cashier}` : '',
+          });
+          this.cdr.detectChanges();
+        });
+      },
+    );
   }
 
   private push(partial: Pick<PosNotification, 'type' | 'title' | 'subtitle'>) {
